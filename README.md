@@ -60,7 +60,6 @@ git push origin main
 
 ## 📋 Rules & Regulations
 
-- Teams must consist of [X] to [X] members
 - Use of AI is permitted
 - Use of open source libraries is permitted
 - Plagiarism will lead to immediate disqualification
