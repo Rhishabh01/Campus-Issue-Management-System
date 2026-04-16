@@ -1,40 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import NavbarUser from "../components/NavbarUser";
 import IssueCard from "../components/IssueCard";
 import MapView from "../components/MapView";
+import { getIssues, getNotifications } from "../services/api";
 
 export default function DashboardUser() {
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const stats = [
-    { label: "Total Reported", value: "24", icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", color: "bg-blue-500" },
-    { label: "In Progress", value: "8", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "bg-yellow-500" },
-    { label: "Resolved", value: "16", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", color: "bg-green-500" },
-  ];
+  const [issues, setIssues] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const user = { email: "user1@gmail.com" }; // Mock integration
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getIssues({ role: "user", userId: user.email });
+        setIssues(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const recentIssues = [
-    { id: 1, title: "Pothole on Main Street", description: "Large pothole causing traffic hazards near the intersection.", status: "reported", location: "123 Main St", createdAt: "2 hours ago", lat: 34.0522, lng: -118.2437 },
-    { id: 2, title: "Broken Street Light", description: "Street light not working for past 3 days, area is dark at night.", status: "in-progress", location: "456 Oak Ave", createdAt: "1 day ago", lat: 34.0532, lng: -118.2447 },
-    { id: 3, title: "Graffiti on Public Wall", description: "Vandalism reported on community center exterior wall.", status: "resolved", location: "789 Community Center", createdAt: "3 days ago", lat: 34.0512, lng: -118.2427 },
-    { id: 4, title: "Drainage Blockage", description: "Storm drain clogged causing water accumulation.", status: "reported", location: "321 Elm Blvd", createdAt: "5 hours ago", lat: 34.0542, lng: -118.2457 },
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const res = await getNotifications(user.email);
+        setNotifications(res.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const stats = [
+    { label: "Total Reported", value: issues.length, icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", color: "bg-blue-500" },
+    { label: "In Progress", value: issues.filter(i => i.status === "In Progress").length, icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "bg-yellow-500" },
+    { label: "Resolved", value: issues.filter(i => i.status === "Resolved").length, icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z", color: "bg-green-500" },
   ];
 
   const filters = [
-    { id: "all", label: "Total Issues Reported" },
-    { id: "reported", label: "Reported" },
-    { id: "in-progress", label: "In Progress" },
-    { id: "resolved", label: "Resolved" },
+    { id: "all", label: "Total Issues" },
+    { id: "Open", label: "Open" },
+    { id: "In Progress", label: "In Progress" },
+    { id: "Resolved", label: "Resolved" },
   ];
 
   const filteredIssues = selectedFilter === "all" 
-    ? recentIssues 
-    : recentIssues.filter(issue => issue.status === selectedFilter);
+    ? issues 
+    : issues.filter(issue => issue.status === selectedFilter);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <NavbarUser />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -93,7 +120,9 @@ export default function DashboardUser() {
           <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
               <h2 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Issue List</h2>
-              {filteredIssues.length > 0 ? (
+              {loading ? (
+                <div className="text-center py-12 text-gray-400">Loading issues...</div>
+              ) : filteredIssues.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {filteredIssues.map((issue) => (
                     <IssueCard key={issue.id} issue={issue} />

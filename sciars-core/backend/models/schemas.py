@@ -5,7 +5,7 @@ class IssueCreate(BaseModel):
     userId: str
     category: str
     description: str
-    imageUrl: str
+    imageUrl: Optional[str] = None
     lat: float
     lng: float
     locationText: str

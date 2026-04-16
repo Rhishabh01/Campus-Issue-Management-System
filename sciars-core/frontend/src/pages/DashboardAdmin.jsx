@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchIssues } from '../services/api';
+import { getIssues, verifyIssue } from '../services/api';
 import MapView from '../components/MapView';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import NotificationBell from '../components/NotificationBell';
@@ -20,7 +20,8 @@ const DashboardAdmin = () => {
   useEffect(() => {
     const loadIssues = async () => {
       try {
-        const data = await fetchIssues('admin');
+        const res = await getIssues({ role: "admin" });
+        const data = res.data;
         setIssues(Array.isArray(data) && data.length > 0 ? data : MOCK_ISSUES);
       } catch {
         setIssues(MOCK_ISSUES);
@@ -30,6 +31,16 @@ const DashboardAdmin = () => {
     };
     loadIssues();
   }, []);
+
+  const handleVerify = async (id) => {
+    try {
+      await verifyIssue(id, { verified: true });
+      alert("Issue marked as verified successfully.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to verify issue.");
+    }
+  };
 
   if (loading) {
     return (

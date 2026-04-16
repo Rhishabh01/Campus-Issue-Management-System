@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import NavbarUser from "../components/NavbarUser";
+import { createIssue } from "../services/api";
+
+const mapCategory = (cat) => {
+  const map = {
+    infrastructure: "Infrastructure",
+    utilities: "Electrical",
+    sanitation: "Cleanliness",
+    safety: "Safety",
+    transport: "Transport",
+    environment: "Environment"
+  };
+  return map[cat] || "Other";
+};
 
 const categories = [
   { id: "infrastructure", label: "Infrastructure", icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" },
@@ -57,15 +70,40 @@ export default function ReportIssue() {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const user = { email: "user1@gmail.com" };
+
+      const payload = {
+        userId: user.email,
+        category: mapCategory(formData.category),
+        description: formData.description,
+        lat: 17.3850,
+        lng: 78.4867,
+        locationText: formData.location
+      };
+
+      const res = await createIssue(payload);
+
+      if (res.data && res.data.duplicate) {
+        alert("Issue already exists!");
+        setIsSubmitting(false);
+        return;
+      }
+
+      alert("Issue submitted successfully");
       setIsSubmitting(false);
       navigate("/user");
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      const msg = err?.response?.data?.detail?.message || err?.response?.data?.detail || "Failed to submit issue to backend.";
+      alert(msg);
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <NavbarUser />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">

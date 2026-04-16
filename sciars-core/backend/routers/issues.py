@@ -12,6 +12,9 @@ CATEGORY_MAP = {
     "Cleanliness": "clean@campus.edu",
     "Infrastructure": "infra@campus.edu",
     "Accessibility": "access@campus.edu",
+    "Safety": "safety@campus.edu",
+    "Transport": "transport@campus.edu",
+    "Environment": "environment@campus.edu",
 }
 
 VALID_STATUSES = ["Open", "In Progress", "Resolved", "Closed"]
