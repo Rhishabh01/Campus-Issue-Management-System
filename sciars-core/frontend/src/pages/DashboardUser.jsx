@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NavbarUser from "../components/NavbarUser";
 import IssueCard from "../components/IssueCard";
 import MapView from "../components/MapView";
@@ -7,6 +7,7 @@ import { getIssues, getNotifications } from "../services/api";
 
 export default function DashboardUser() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedIssue, setSelectedIssue] = useState(null);
 
@@ -27,7 +28,7 @@ export default function DashboardUser() {
       }
     };
     fetchData();
-  }, []);
+  }, [location.key]);
 
   useEffect(() => {
     const fetchNotifs = async () => {
@@ -142,7 +143,7 @@ export default function DashboardUser() {
 
             <div className="flex flex-col sticky top-6 self-start">
               <h2 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Issue Map</h2>
-              <MapView className="h-[600px] border border-gray-200" issues={filteredIssues.filter((i) => i.lat && i.lng)} interactive={false} />
+              <MapView className="h-[600px] border border-gray-200" issues={filteredIssues.filter((i) => i.location?.lat && i.location?.lng)} />
             </div>
           </div>
         </div>
