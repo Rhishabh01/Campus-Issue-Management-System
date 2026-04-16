@@ -1,4 +1,4 @@
-const IssueCard = ({ issue }) => {
+const IssueCard = ({ issue, onClick }) => {
   const { category, description, status, location } = issue || {};
   const locationText = location?.text || "Location not specified";
   const statusColors = {
@@ -35,7 +35,10 @@ const IssueCard = ({ issue }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+    <div
+      onClick={onClick}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md hover:border-primary-300 transition-all cursor-pointer"
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-primary-50 rounded-lg">

@@ -8,6 +8,7 @@ import { getIssues, getNotifications } from "../services/api";
 export default function DashboardUser() {
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [selectedIssue, setSelectedIssue] = useState(null);
 
   const [issues, setIssues] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -125,7 +126,7 @@ export default function DashboardUser() {
               ) : filteredIssues.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {filteredIssues.map((issue) => (
-                    <IssueCard key={issue.id} issue={issue} />
+                    <IssueCard key={issue.id} issue={issue} onClick={() => setSelectedIssue(issue)} />
                   ))}
                 </div>
               ) : (
@@ -161,6 +162,64 @@ export default function DashboardUser() {
           </div>
         </div>
       </div>
+
+      {/* Issue Detail Popup */}
+      {selectedIssue && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+          onClick={() => setSelectedIssue(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-gray-900">Issue Report</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                  selectedIssue.status === "Open" ? "bg-red-100 text-red-800 border-red-200" :
+                  selectedIssue.status === "In Progress" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                  selectedIssue.status === "Resolved" ? "bg-green-100 text-green-800 border-green-200" :
+                  "bg-gray-100 text-gray-600 border-gray-200"
+                }`}>{selectedIssue.status}</span>
+              </div>
+              <button
+                onClick={() => setSelectedIssue(null)}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body — only user-provided fields */}
+            <div className="px-6 py-5 space-y-4">
+
+              {/* Category */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Category</p>
+                <p className="text-sm font-medium text-gray-800">{selectedIssue.category || "—"}</p>
+              </div>
+
+              {/* Description */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Description</p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedIssue.description || "—"}</p>
+              </div>
+
+              {/* Location text */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Location</p>
+                <p className="text-sm text-gray-700">{selectedIssue.location?.text || "Not specified"}</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
