@@ -1,20 +1,38 @@
+import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
-const DashboardCharts = () => {
-  const categoryData = [
-    { name: "Infrastructure", count: 12 },
-    { name: "Utilities", count: 8 },
-    { name: "Sanitation", count: 15 },
-    { name: "Safety", count: 6 },
-    { name: "Transportation", count: 9 },
-    { name: "Environment", count: 4 },
-  ];
+const DashboardCharts = ({ tasks = [] }) => {
+  const categoryData = useMemo(() => {
+    const counts = {};
+    tasks.forEach(task => {
+      counts[task.category] = (counts[task.category] || 0) + 1;
+    });
+    return Object.keys(counts).map(name => ({
+      name,
+      count: counts[name]
+    })).sort((a, b) => b.count - a.count); // sort highest to lowest
+  }, [tasks]);
 
-  const statusData = [
-    { name: "Open", value: 18, color: "#EF4444" },
-    { name: "In Progress", value: 12, color: "#F59E0B" },
-    { name: "Resolved", value: 24, color: "#10B981" },
-  ];
+  const statusData = useMemo(() => {
+    const counts = {
+      Open: 0,
+      "In Progress": 0,
+      Resolved: 0
+    };
+    
+    tasks.forEach(task => {
+      const status = task.status === "Closed" ? "Resolved" : task.status;
+      if (counts[status] !== undefined) {
+        counts[status]++;
+      }
+    });
+
+    return [
+      { name: "Open", value: counts["Open"], color: "#EF4444" },
+      { name: "In Progress", value: counts["In Progress"], color: "#F59E0B" },
+      { name: "Resolved", value: counts["Resolved"], color: "#10B981" },
+    ].filter(item => item.value > 0); // only show slices with data
+  }, [tasks]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

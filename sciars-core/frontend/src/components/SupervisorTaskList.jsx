@@ -1,31 +1,12 @@
-import { useState, useEffect } from "react";
 import IssueCard from "./IssueCard";
-import { getIssues, updateStatus } from "../services/api";
+import { updateStatus } from "../services/api";
 
-const SupervisorTaskList = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const user = { email: "supervisor1@gmail.com" }; // Mock user
-  
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const res = await getIssues({ role: "supervisor", email: user.email });
-      setTasks(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+const SupervisorTaskList = ({ tasks = [], loading = false, onStatusChange }) => {
 
   const handleStartWork = async (taskId) => {
     try {
       await updateStatus(taskId, { status: "In Progress" });
-      fetchTasks();
+      if (onStatusChange) onStatusChange();
     } catch (err) {
       console.error(err);
     }
@@ -33,8 +14,11 @@ const SupervisorTaskList = () => {
 
   const handleMarkResolved = async (taskId) => {
     try {
-      await updateStatus(taskId, { status: "Resolved" });
-      fetchTasks();
+      await updateStatus(taskId, { 
+        status: "Resolved", 
+        proofImageUrl: "https://via.placeholder.com/300?text=Resolved+Proof" 
+      });
+      if (onStatusChange) onStatusChange();
     } catch (err) {
       console.error(err);
     }
@@ -78,7 +62,7 @@ const SupervisorTaskList = () => {
                 Mark Resolved
               </button>
             )}
-            {task.status === "Resolved" && (
+            {(task.status === "Resolved" || task.status === "Closed") && (
               <span className="flex-1 text-center text-sm text-green-600 font-medium py-2">
                 Completed
               </span>

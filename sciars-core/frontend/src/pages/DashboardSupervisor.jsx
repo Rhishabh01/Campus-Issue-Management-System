@@ -1,8 +1,38 @@
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import SupervisorTaskList from "../components/SupervisorTaskList";
 import DashboardCharts from "../components/DashboardCharts";
+import { getIssues } from "../services/api";
 
 const DashboardSupervisor = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const user = { email: "supervisor1@gmail.com" }; // Mock user
+
+  const fetchTasks = async () => {
+    try {
+      const res = await getIssues({ role: "supervisor", email: user.email });
+      setTasks(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Failed to fetch tasks in polling:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+    const interval = setInterval(fetchTasks, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const stats = {
+    open: tasks.filter((t) => t.status === "Open").length,
+    inProgress: tasks.filter((t) => t.status === "In Progress").length,
+    resolved: tasks.filter((t) => t.status === "Resolved" || t.status === "Closed").length,
+    total: tasks.length,
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -17,7 +47,7 @@ const DashboardSupervisor = () => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">My Tasks</h2>
-              <SupervisorTaskList />
+              <SupervisorTaskList tasks={tasks} loading={loading} onStatusChange={fetchTasks} />
             </div>
           </div>
 
@@ -25,10 +55,10 @@ const DashboardSupervisor = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Stats</h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-100">
+                <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-100 transition-colors duration-300">
                   <div>
                     <p className="text-sm text-red-600 font-medium">Open</p>
-                    <p className="text-2xl font-bold text-red-700">18</p>
+                    <p className="text-2xl font-bold text-red-700">{stats.open}</p>
                   </div>
                   <div className="p-3 bg-red-100 rounded-full">
                     <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,10 +66,10 @@ const DashboardSupervisor = () => {
                     </svg>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                <div className="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-100 transition-colors duration-300">
                   <div>
                     <p className="text-sm text-yellow-600 font-medium">In Progress</p>
-                    <p className="text-2xl font-bold text-yellow-700">12</p>
+                    <p className="text-2xl font-bold text-yellow-700">{stats.inProgress}</p>
                   </div>
                   <div className="p-3 bg-yellow-100 rounded-full">
                     <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,10 +77,10 @@ const DashboardSupervisor = () => {
                     </svg>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-100">
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-100 transition-colors duration-300">
                   <div>
                     <p className="text-sm text-green-600 font-medium">Resolved</p>
-                    <p className="text-2xl font-bold text-green-700">24</p>
+                    <p className="text-2xl font-bold text-green-700">{stats.resolved}</p>
                   </div>
                   <div className="p-3 bg-green-100 rounded-full">
                     <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,10 +88,10 @@ const DashboardSupervisor = () => {
                     </svg>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100 transition-colors duration-300">
                   <div>
                     <p className="text-sm text-blue-600 font-medium">Total</p>
-                    <p className="text-2xl font-bold text-blue-700">54</p>
+                    <p className="text-2xl font-bold text-blue-700">{stats.total}</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-full">
                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +106,7 @@ const DashboardSupervisor = () => {
 
         <div className="mt-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Analytics</h2>
-          <DashboardCharts />
+          <DashboardCharts tasks={tasks} />
         </div>
       </div>
     </div>
@@ -84,3 +114,4 @@ const DashboardSupervisor = () => {
 };
 
 export default DashboardSupervisor;
+
