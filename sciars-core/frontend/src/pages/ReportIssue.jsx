@@ -105,13 +105,14 @@ export default function ReportIssue() {
         description: formData.description,
         lat: formData.lat ?? 17.3850,
         lng: formData.lng ?? 78.4867,
-        locationText: formData.location
+        locationText: formData.location,
+        imageUrl: formData.image ? imagePreview : null
       };
 
       const res = await createIssue(payload);
 
       if (res.data && res.data.duplicate) {
-        alert("Issue already exists!");
+        alert("This issue has already been reported! Your report has been successfully merged to help increase its priority.");
         setIsSubmitting(false);
         return;
       }
@@ -249,22 +250,27 @@ export default function ReportIssue() {
                 </label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <input
-                      type="text"
-                      placeholder="Enter address or landmark"
+                    <select
                       value={formData.location}
                       onChange={(e) => {
                         setFormData({ ...formData, location: e.target.value });
                         if (errors.location) setErrors({ ...errors, location: "" });
                       }}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white ${
                         errors.location ? "border-red-500" : "border-gray-300 hover:border-gray-400"
                       }`}
-                    />
+                    >
+                      <option value="">Select college</option>
+                      <option value="Methodist College">Methodist College</option>
+                      <option value="OU College">OU College</option>
+                    </select>
+                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
                   <button
                     type="button"

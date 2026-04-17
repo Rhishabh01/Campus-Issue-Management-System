@@ -16,7 +16,9 @@ const DashboardSupervisor = () => {
   const fetchTasks = async () => {
     try {
       const res = await getIssues({ role: "supervisor", email: user.email });
-      setTasks(Array.isArray(res.data) ? res.data : []);
+      const tasksArray = Array.isArray(res.data) ? res.data : [];
+      const sortedTasks = tasksArray.sort((a, b) => (b.reportCount || 1) - (a.reportCount || 1));
+      setTasks(sortedTasks);
     } catch (err) {
       console.error("Failed to fetch tasks in polling:", err);
     } finally {

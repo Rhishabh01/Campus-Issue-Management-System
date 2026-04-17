@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -48,7 +48,7 @@ const createBallPin = (status) => {
  * MapView - Renders a Leaflet map with custom ball pin markers.
  * Pin colour reflects issue status: red=Open, yellow=In Progress, green=Resolved.
  */
-const MapView = ({ issues = [], center = [17.3850, 78.4867], zoom = 13, className = 'h-96', interactive = true }) => {
+const MapView = ({ issues = [], center = [17.4126, 78.5247], zoom = 15, className = 'h-96', interactive = true }) => {
   return (
     <div className={`w-full ${className} rounded-xl overflow-hidden shadow-md relative z-0`}>
       <MapContainer
@@ -64,6 +64,16 @@ const MapView = ({ issues = [], center = [17.3850, 78.4867], zoom = 13, classNam
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Polygon
+          positions={[
+            [17.4240, 78.5100],
+            [17.4240, 78.5400],
+            [17.4080, 78.5450],
+            [17.4050, 78.5380],
+            [17.4070, 78.5080],
+          ]}
+          pathOptions={{ color: '#dc2626', weight: 3, dashArray: '10, 10', fillColor: '#dc2626', fillOpacity: 0.08 }}
         />
         {issues.map((issue, index) => (
           <Marker

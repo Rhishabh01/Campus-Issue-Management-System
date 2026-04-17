@@ -1,5 +1,5 @@
 const IssueCard = ({ issue, onClick }) => {
-  const { category, description, status, location } = issue || {};
+  const { category, description, status, location, reportCount, priority } = issue || {};
   const locationText = location?.text || "Location not specified";
   const statusColors = {
     Open: "bg-red-100 text-red-800 border-red-200",
@@ -47,11 +47,25 @@ const IssueCard = ({ issue, onClick }) => {
             </svg>
           </div>
           <span className="text-sm font-medium text-gray-600">{category}</span>
+          {reportCount > 1 && (
+            <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">
+              🔥 Reported {reportCount} times
+            </span>
+          )}
         </div>
-        <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${statusColors[status] || statusColors.Open}`}>
-          {statusIcons[status]}
-          {status}
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          {priority && (priority === 'High' || priority === 'Critical') && (
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+              priority === 'Critical' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+            }`}>
+              {priority}
+            </span>
+          )}
+          <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border ${statusColors[status] || statusColors.Open}`}>
+            {statusIcons[status]}
+            {status}
+          </span>
+        </div>
       </div>
       <p className="text-gray-700 text-sm mb-3 line-clamp-2">{description}</p>
       <div className="flex items-center text-xs text-gray-500 gap-1">

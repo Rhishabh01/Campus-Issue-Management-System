@@ -16,6 +16,7 @@ const SORT_OPTIONS = [
   { value: 'oldest', label: 'Oldest First' },
   { value: 'status', label: 'By Status' },
   { value: 'category', label: 'By Category' },
+  { value: 'reports', label: 'Most Reports' },
 ];
 
 export default function AdminIssues() {
@@ -59,6 +60,7 @@ export default function AdminIssues() {
     if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
     if (sort === 'status') return (a.status || '').localeCompare(b.status || '');
     if (sort === 'category') return (a.category || '').localeCompare(b.category || '');
+    if (sort === 'reports') return (b.reportCount || 1) - (a.reportCount || 1);
     return 0;
   });
 
@@ -77,6 +79,17 @@ export default function AdminIssues() {
       hour: '2-digit', minute: '2-digit',
     });
   };
+
+  const getCategoryCount = () => {
+    const counts = {};
+    issues.forEach(issue => {
+      const cat = issue.category || 'Unknown';
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  };
+
+  const categoryCount = getCategoryCount();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -174,7 +187,8 @@ export default function AdminIssues() {
             <div className="hidden md:grid grid-cols-12 gap-4 px-5 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
               <div className="col-span-1">#</div>
               <div className="col-span-2">Category</div>
-              <div className="col-span-3">Description</div>
+              <div className="col-span-1">Reports</div>
+              <div className="col-span-2">Description</div>
               <div className="col-span-2">Location</div>
               <div className="col-span-1">Status</div>
               <div className="col-span-2">Reported By</div>
@@ -204,8 +218,15 @@ export default function AdminIssues() {
                         <span className="text-sm font-semibold text-gray-800">{issue.category || '—'}</span>
                       </div>
 
+                      {/* Reports count */}
+                      <div className="md:col-span-1 flex items-center">
+                        <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
+                          {issue.reportCount || 1}
+                        </span>
+                      </div>
+
                       {/* Description */}
-                      <div className="md:col-span-3 flex items-center">
+                      <div className="md:col-span-2 flex items-center">
                         <p className="text-sm text-gray-600 line-clamp-2">{issue.description || '—'}</p>
                       </div>
 
@@ -266,7 +287,40 @@ export default function AdminIssues() {
                             <img src={issue.imageUrl} alt="Issue" className="max-h-48 rounded-lg border border-gray-200 object-cover" />
                           </div>
                         )}
-                        {issue.proofImageUrl && (
+                        {(issue.status === 'In Progress' || issue.status === 'Resolved' || issue.status === 'Closed') && (
+                          <div className="sm:col-span-2 lg:col-span-4 border-t border-indigo-200 pt-4 mt-2">
+                            <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-3">Supervisor Details</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Supervisor Name</p>
+                                <p className="text-sm font-medium text-gray-800">{issue.supervisorName || '—'}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Supervisor Email</p>
+                                <p className="text-sm text-gray-700">{issue.supervisorEmail || '—'}</p>
+                              </div>
+                              {issue.supervisorDescription && (
+                                <div className="sm:col-span-2">
+                                  <p className="text-xs text-gray-500 mb-1">Description</p>
+                                  <p className="text-sm text-gray-700">{issue.supervisorDescription}</p>
+                                </div>
+                              )}
+                              {issue.supervisorPhoto && (
+                                <div>
+                                  <p className="text-xs text-gray-500 mb-1">Supervisor Photo</p>
+                                  <img src={issue.supervisorPhoto} alt="Supervisor" className="w-16 h-16 rounded-full border border-gray-300 object-cover" />
+                                </div>
+                              )}
+                              {issue.proofImageUrl && (
+                                <div>
+                                  <p className="text-xs text-gray-500 mb-1">Proof Photo</p>
+                                  <img src={issue.proofImageUrl} alt="Proof" className="max-h-24 rounded-lg border border-green-200 object-cover" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {issue.status === 'Resolved' && issue.proofImageUrl && !issue.supervisorPhoto && (
                           <div className="sm:col-span-2 lg:col-span-4">
                             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Resolution Proof</p>
                             <img src={issue.proofImageUrl} alt="Proof" className="max-h-48 rounded-lg border border-green-200 object-cover" />

@@ -24,8 +24,13 @@ const NavbarUser = () => {
     <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/user" className="text-xl font-bold text-primary-600 hover:text-primary-700 transition-colors">
-            SCIARS
+          <Link to="/user" className="flex items-center gap-2">
+            <span className="text-xl font-bold text-primary-600 hover:text-primary-700 transition-colors">
+              SCIARS
+            </span>
+            <span className="px-2 py-0.5 text-xs font-semibold bg-primary-100 text-primary-700 rounded uppercase tracking-wide">
+              User
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">

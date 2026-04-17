@@ -85,6 +85,10 @@ def create_issue(issue: IssueCreate):
             "createdAt": datetime.utcnow().isoformat(),
             "resolvedAt": None,
             "proofImageUrl": None,
+            "supervisorName": None,
+            "supervisorEmail": None,
+            "supervisorPhoto": None,
+            "supervisorDescription": None,
         }
 
         doc_ref = issues_ref.add(new_issue)
@@ -199,6 +203,16 @@ def update_status(id: str, payload: IssueStatusUpdate):
 
         update_data = {"status": payload.status}
 
+        if payload.status == "In Progress":
+            if payload.supervisorName:
+                update_data["supervisorName"] = payload.supervisorName
+            if payload.supervisorEmail:
+                update_data["supervisorEmail"] = payload.supervisorEmail
+            if payload.supervisorPhoto:
+                update_data["supervisorPhoto"] = payload.supervisorPhoto
+            if payload.supervisorDescription:
+                update_data["supervisorDescription"] = payload.supervisorDescription
+
         if payload.status == "Resolved":
             if not payload.proofImageUrl:
                 raise HTTPException(
@@ -209,9 +223,25 @@ def update_status(id: str, payload: IssueStatusUpdate):
                     },
                 )
             update_data["proofImageUrl"] = payload.proofImageUrl
+            if payload.supervisorName:
+                update_data["supervisorName"] = payload.supervisorName
+            if payload.supervisorEmail:
+                update_data["supervisorEmail"] = payload.supervisorEmail
+            if payload.supervisorPhoto:
+                update_data["supervisorPhoto"] = payload.supervisorPhoto
+            if payload.supervisorDescription:
+                update_data["supervisorDescription"] = payload.supervisorDescription
 
         if payload.status == "Closed":
             update_data["resolvedAt"] = datetime.utcnow().isoformat()
+            if payload.supervisorName:
+                update_data["supervisorName"] = payload.supervisorName
+            if payload.supervisorEmail:
+                update_data["supervisorEmail"] = payload.supervisorEmail
+            if payload.supervisorPhoto:
+                update_data["supervisorPhoto"] = payload.supervisorPhoto
+            if payload.supervisorDescription:
+                update_data["supervisorDescription"] = payload.supervisorDescription
 
         issue_ref.update(update_data)
 

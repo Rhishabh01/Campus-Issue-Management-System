@@ -7,9 +7,6 @@ const NavbarAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [usersDropdown, setUsersDropdown] = useState(false);
-  const [userStats, setUserStats] = useState({ totalUsers: 0, topUsers: [], areaBreakdown: [] });
-  const dropdownRef = useRef(null);
 
   const adminEmail = useMemo(() => {
     try {
@@ -23,52 +20,6 @@ const NavbarAdmin = () => {
   }, []);
 
   const isActive = (path) => location.pathname === path;
-
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const res = await getIssues({ role: "admin" });
-        const issues = Array.isArray(res.data) ? res.data : [];
-        
-        const userCount = {};
-        const areaCount = {};
-        
-        issues.forEach(issue => {
-          if (issue.reportedBy) {
-            userCount[issue.reportedBy] = (userCount[issue.reportedBy] || 0) + 1;
-          }
-          if (issue.area) {
-            areaCount[issue.area] = (areaCount[issue.area] || 0) + 1;
-          }
-        });
-
-        const topUsers = Object.entries(userCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([name, count]) => ({ name, count }));
-
-        const areaBreakdown = Object.entries(areaCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([area, count]) => ({ area, count }));
-
-        setUserStats({ totalUsers: Object.keys(userCount).length, topUsers, areaBreakdown });
-      } catch {
-        setUserStats({ totalUsers: 0, topUsers: [], areaBreakdown: [] });
-      }
-    };
-    loadStats();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setUsersDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const navLinks = [
     {
@@ -95,9 +46,14 @@ const NavbarAdmin = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
-            <span className="text-xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
-              SCIARS
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+                SCIARS
+              </span>
+              <span className="px-2 py-0.5 text-xs font-semibold bg-indigo-100 text-indigo-700 rounded uppercase tracking-wide">
+                Admin
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Nav Links */}
@@ -120,74 +76,9 @@ const NavbarAdmin = () => {
             ))}
           </div>
 
-          {/* Right side: Bell + Users Dropdown + Logout */}
+          {/* Right side: Bell + Logout */}
           <div className="flex items-center gap-3">
             <AdminNotificationBell />
-
-            {/* Users Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setUsersDropdown(!usersDropdown)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  usersDropdown
-                    ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Users ({userStats.totalUsers})
-                <svg className={`w-4 h-4 transition-transform ${usersDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {usersDropdown && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 py-3 z-50">
-                  <div className="px-4 pb-2 border-b border-gray-100">
-                    <p className="text-xs text-gray-500">User Statistics</p>
-                  </div>
-                  
-                  <div className="px-4 py-2">
-                    <p className="text-2xl font-bold text-indigo-600">{userStats.totalUsers}</p>
-                    <p className="text-xs text-gray-500">Total Users</p>
-                  </div>
-
-                  <div className="px-4 py-2 border-t border-gray-100">
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Top Complainants</p>
-                    {userStats.topUsers.length > 0 ? (
-                      <ul className="space-y-1">
-                        {userStats.topUsers.map((user, idx) => (
-                          <li key={idx} className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600 truncate">{user.name}</span>
-                            <span className="font-semibold text-indigo-600 ml-2">{user.count}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-xs text-gray-400">No data</p>
-                    )}
-                  </div>
-
-                  <div className="px-4 py-2 border-t border-gray-100">
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Top Areas</p>
-                    {userStats.areaBreakdown.length > 0 ? (
-                      <ul className="space-y-1">
-                        {userStats.areaBreakdown.map((item, idx) => (
-                          <li key={idx} className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600 truncate">{item.area}</span>
-                            <span className="font-semibold text-indigo-600 ml-2">{item.count}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-xs text-gray-400">No data</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
 
             {/* Logout */}
             <button
@@ -235,22 +126,6 @@ const NavbarAdmin = () => {
                 {link.label}
               </Link>
             ))}
-            <button
-              onClick={() => {
-                setUsersDropdown(!usersDropdown);
-                setMobileOpen(false);
-              }}
-              className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-                usersDropdown
-                  ? 'bg-indigo-50 text-indigo-600'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-indigo-600'
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Users ({userStats.totalUsers})
-            </button>
           </div>
         )}
       </div>

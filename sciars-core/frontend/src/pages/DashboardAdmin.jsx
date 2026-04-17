@@ -38,11 +38,11 @@ const DashboardAdmin = () => {
     const areaCount = {};
     
     issues.forEach(issue => {
-      if (issue.reportedBy) {
-        userCount[issue.reportedBy] = (userCount[issue.reportedBy] || 0) + 1;
+      if (issue.userId) {
+        userCount[issue.userId] = (userCount[issue.userId] || 0) + 1;
       }
-      if (issue.area) {
-        areaCount[issue.area] = (areaCount[issue.area] || 0) + 1;
+      if (issue.location?.text) {
+        areaCount[issue.location.text] = (areaCount[issue.location.text] || 0) + 1;
       }
     });
 
