@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from models.schemas import IssueCreate, IssueStatusUpdate, VerifyIssue
+from firebase_admin import firestore
 from services.firebase_admin import db
 from services.duplicate_check import haversine
 from datetime import datetime
@@ -42,6 +43,7 @@ def create_notification(user_id: str, title: str, message: str, issue_id: str):
 @router.post("/")
 def create_issue(issue: IssueCreate):
     try:
+        print("Incoming issue:", issue.category, issue.lat, issue.lng, issue.locationText)
         if issue.category not in CATEGORY_MAP:
             raise HTTPException(
                 status_code=400,
@@ -60,12 +62,29 @@ def create_issue(issue: IssueCreate):
                 loc = data.get("location", {})
                 if "lat" in loc and "lng" in loc:
                     dist = haversine(issue.lat, issue.lng, loc["lat"], loc["lng"])
-                    if dist < 50:
+                    print("Checking existing issue:", data.get("location"))
+                    print("Distance:", dist)
+                    if dist < 120 or issue.locationText.strip().lower() == loc.get("text", "").strip().lower():
+                        print("Duplicate detected → merging reports")
+                        existing_ref = issues_ref.document(doc.id)
+                        
+                        existing_ref.update({
+                            "reportCount": firestore.Increment(1),
+                            "reportedBy": firestore.ArrayUnion([issue.userId])
+                        })
+                        
+                        updated_doc = existing_ref.get().to_dict()
+                        count = updated_doc.get("reportCount", 1)
+
+                        if count >= 10:
+                            existing_ref.update({"priority": "Critical"})
+                        elif count >= 5:
+                            existing_ref.update({"priority": "High"})
+                            
                         return {
-                            "success": False,
-                            "duplicate": True,
-                            "message": "Similar issue already exists at this location",
-                            "existingIssueId": doc.id,
+                            "success": True,
+                            "issueId": doc.id,
+                            "assignedTo": data.get("assignedTo")
                         }
 
         assigned_to = CATEGORY_MAP.get(issue.category, "default@campus.edu")
