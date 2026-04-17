@@ -10,11 +10,27 @@ export default function DashboardUser() {
   const location = useLocation();
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedIssue, setSelectedIssue] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCollege, setSelectedCollege] = useState("");
 
   const [issues, setIssues] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = { email: "user1@gmail.com" }; // Mock integration
+
+  const categories = [
+    { id: "Infrastructure", label: "Infrastructure" },
+    { id: "Electrical", label: "Electrical" },
+    { id: "Cleanliness", label: "Cleanliness" },
+    { id: "Safety", label: "Safety" },
+    { id: "Transport", label: "Transport" },
+    { id: "Environment", label: "Environment" },
+  ];
+
+  const colleges = [
+    { id: "Methodist College", label: "Methodist College" },
+    { id: "OU College", label: "OU College" },
+  ];
   
   useEffect(() => {
     const fetchData = async () => {
@@ -57,9 +73,14 @@ export default function DashboardUser() {
     { id: "Resolved", label: "Resolved" },
   ];
 
-  const filteredIssues = selectedFilter === "all" 
-    ? issues 
-    : issues.filter(issue => issue.status === selectedFilter);
+  const filteredIssues = issues.filter(issue => {
+    const statusMatch = selectedFilter === "all" || issue.status === selectedFilter;
+    const categoryMatch = !selectedCategory || issue.category === selectedCategory;
+    const collegeMatch = !selectedCollege || 
+      (issue.college && issue.college === selectedCollege) ||
+      (issue.location?.text && issue.location.text.toLowerCase().includes(selectedCollege.toLowerCase()));
+    return statusMatch && categoryMatch && collegeMatch;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,15 +122,15 @@ export default function DashboardUser() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200">
-            <div className="flex flex-wrap gap-2 p-4">
+          <div className="border-b border-gray-200 p-4">
+            <div className="flex flex-wrap gap-2 mb-3">
               {filters.map((filter) => (
                 <button
                   key={filter.id}
                   onClick={() => setSelectedFilter(filter.id)}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     selectedFilter === filter.id
-                      ? "bg-primary-600 text-white"
+                      ? "bg-primary-600 text-white shadow-md"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
@@ -117,6 +138,58 @@ export default function DashboardUser() {
                 </button>
               ))}
             </div>
+            <div className="flex flex-wrap gap-3 items-center bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</span>
+              </div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white min-w-[140px]"
+              >
+                <option value="">All Categories</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.label}</option>
+                ))}
+              </select>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Location</span>
+              </div>
+              <select
+                value={selectedCollege}
+                onChange={(e) => setSelectedCollege(e.target.value)}
+                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white min-w-[160px]"
+              >
+                <option value="">All Locations</option>
+                {colleges.map((college) => (
+                  <option key={college.id} value={college.id}>{college.label}</option>
+                ))}
+              </select>
+              {(selectedCategory || selectedCollege) && (
+                <button
+                  onClick={() => { setSelectedCategory(""); setSelectedCollege(""); }}
+                  className="ml-auto px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors flex items-center gap-1"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Clear
+                </button>
+              )}
+            </div>
+            {(selectedCategory || selectedCollege) && (
+              <p className="mt-2 text-xs text-gray-500">
+                Showing {filteredIssues.length} of {issues.length} issues
+              </p>
+            )}
           </div>
 
           <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
