@@ -39,7 +39,8 @@ export default function ReportIssue() {
     description: "",
     category: "",
     priority: "medium",
-    location: "",
+    college: "",
+    locationText: "",
     lat: null,
     lng: null,
     image: null,
@@ -88,7 +89,8 @@ export default function ReportIssue() {
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.description.trim()) newErrors.description = "Description is required";
     if (!formData.category) newErrors.category = "Please select a category";
-    if (!formData.location.trim()) newErrors.location = "Location is required";
+    if (!formData.college) newErrors.location = "Please select a college";
+    if (!formData.locationText.trim()) newErrors.location = "Location description is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -107,7 +109,8 @@ export default function ReportIssue() {
         description: formData.description,
         lat: formData.lat ?? 17.3850,
         lng: formData.lng ?? 78.4867,
-        locationText: formData.location,
+        college: formData.college,
+        locationText: formData.locationText,
         imageUrl: formData.image ? imagePreview : null
       };
 
@@ -250,16 +253,15 @@ export default function ReportIssue() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Location <span className="text-red-500">*</span>
                 </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
+                <div className="space-y-3">
+                  <div className="relative">
                     <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                     <select
-                      value={formData.location}
+                      value={formData.college}
                       onChange={(e) => {
-                        setFormData({ ...formData, location: e.target.value });
+                        setFormData({ ...formData, college: e.target.value });
                         if (errors.location) setErrors({ ...errors, location: "" });
                       }}
                       className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white ${
@@ -274,51 +276,65 @@ export default function ReportIssue() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleGPS}
-                    disabled={gpsLoading}
-                    title="Use my current GPS location"
-                    className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-                      gpsStatus === "success"
-                        ? "bg-green-50 border-green-300 text-green-700"
-                        : gpsStatus === "error"
-                        ? "bg-red-50 border-red-300 text-red-600"
-                        : "bg-gray-50 border-gray-300 text-gray-600 hover:bg-primary-50 hover:border-primary-400 hover:text-primary-700"
-                    } disabled:opacity-60 disabled:cursor-not-allowed`}
-                  >
-                    {gpsLoading ? (
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                    ) : gpsStatus === "success" ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    ) : gpsStatus === "error" ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
+                  <textarea
+                    rows={2}
+                    placeholder="Describe the specific location (e.g., Near the main entrance, Behind the cafeteria)..."
+                    value={formData.locationText}
+                    onChange={(e) => {
+                      setFormData({ ...formData, locationText: e.target.value });
+                      if (errors.location) setErrors({ ...errors, location: "" });
+                    }}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${
+                      errors.location ? "border-red-500" : "border-gray-300 hover:border-gray-400"
+                    }`}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleGPS}
+                      disabled={gpsLoading}
+                      title="Use my current GPS location"
+                      className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                        gpsStatus === "success"
+                          ? "bg-green-50 border-green-300 text-green-700"
+                          : gpsStatus === "error"
+                          ? "bg-red-50 border-red-300 text-red-600"
+                          : "bg-gray-50 border-gray-300 text-gray-600 hover:bg-primary-50 hover:border-primary-400 hover:text-primary-700"
+                      } disabled:opacity-60 disabled:cursor-not-allowed`}
+                    >
+                      {gpsLoading ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                      ) : gpsStatus === "success" ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : gpsStatus === "error" ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      )}
+                      <span>
+                        {gpsLoading ? "Locating..." : gpsStatus === "success" ? "Located" : gpsStatus === "error" ? "Failed" : "GPS"}
+                      </span>
+                    </button>
+                    {gpsStatus === "success" && formData.lat && (
+                      <p className="flex items-center text-xs text-green-600 font-medium">
+                        ✓ {formData.lat.toFixed(5)}, {formData.lng.toFixed(5)}
+                      </p>
                     )}
-                    <span className="hidden sm:inline">
-                      {gpsLoading ? "Locating..." : gpsStatus === "success" ? "Located" : gpsStatus === "error" ? "Failed" : "My Location"}
-                    </span>
-                  </button>
+                    {gpsStatus === "error" && (
+                      <p className="text-xs text-red-500">Could not get GPS location</p>
+                    )}
+                  </div>
                 </div>
-                {gpsStatus === "success" && formData.lat && (
-                  <p className="mt-1.5 text-xs text-green-600 font-medium">
-                    ✓ GPS captured: {formData.lat.toFixed(5)}, {formData.lng.toFixed(5)}
-                  </p>
-                )}
-                {gpsStatus === "error" && (
-                  <p className="mt-1.5 text-xs text-red-500">Could not get GPS location. Please allow location access or type manually.</p>
-                )}
                 {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location}</p>}
               </div>
             </div>
