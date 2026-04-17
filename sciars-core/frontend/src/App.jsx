@@ -6,6 +6,7 @@ import ReportIssue from "./pages/ReportIssue";
 import DashboardUser from "./pages/DashboardUser";
 import DashboardSupervisor from "./pages/DashboardSupervisor";
 import DashboardAdmin from "./pages/DashboardAdmin";
+import AdminIssues from "./pages/AdminIssues";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/user" element={<DashboardUser />} />
         <Route path="/supervisor" element={<DashboardSupervisor />} />
         <Route path="/admin" element={<DashboardAdmin />} />
+        <Route path="/admin/issues" element={<AdminIssues />} />
       </Routes>
     </BrowserRouter>
   );

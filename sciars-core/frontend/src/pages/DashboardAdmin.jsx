@@ -2,16 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { getIssues, verifyIssue } from '../services/api';
 import MapView from '../components/MapView';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
-import NotificationBell from '../components/NotificationBell';
+import NavbarAdmin from '../components/NavbarAdmin';
 
-const MOCK_ISSUES = [
-  { id: 'mock-1', category: 'Electrical', description: 'Streetlight not working near the main gate entrance. Causes safety concerns at night.', status: 'Open', location: { lat: 17.3950, lng: 78.4867, text: 'Main Gate' }, createdAt: '2026-04-10T08:00:00Z', updatedAt: '2026-04-10T08:00:00Z' },
-  { id: 'mock-2', category: 'Plumbing', description: 'Water leakage in the second floor washroom. Flooding the corridor.', status: 'In Progress', location: { lat: 17.3855, lng: 78.4880, text: 'Science Block - 2nd Floor' }, createdAt: '2026-04-09T10:30:00Z', updatedAt: '2026-04-12T14:00:00Z' },
-  { id: 'mock-3', category: 'Furniture', description: 'Broken chairs in Room 301. Three chairs have missing backrests.', status: 'Resolved', location: { lat: 17.3840, lng: 78.4850, text: 'Arts Building - Room 301' }, createdAt: '2026-04-05T09:00:00Z', updatedAt: '2026-04-11T16:45:00Z' },
-  { id: 'mock-4', category: 'Cleaning', description: 'Restroom in library basement is not maintained properly.', status: 'Closed', location: { lat: 17.3860, lng: 78.4900, text: 'Central Library - Basement' }, createdAt: '2026-04-01T07:00:00Z', updatedAt: '2026-04-08T12:00:00Z' },
-  { id: 'mock-5', category: 'Electrical', description: 'Fan not working in Lecture Hall 2. Students complaining about heat.', status: 'Open', location: { lat: 17.3845, lng: 78.4870, text: 'Lecture Hall 2' }, createdAt: '2026-04-14T11:00:00Z', updatedAt: '2026-04-14T11:00:00Z' },
-  { id: 'mock-6', category: 'Network', description: 'Wi-Fi connectivity issues in the hostel common room.', status: 'In Progress', location: { lat: 17.3835, lng: 78.4840, text: 'Hostel Block A - Common Room' }, createdAt: '2026-04-13T15:30:00Z', updatedAt: '2026-04-15T09:00:00Z' },
-];
 
 const DashboardAdmin = () => {
   const [issues, setIssues] = useState([]);
@@ -21,10 +13,9 @@ const DashboardAdmin = () => {
     const loadIssues = async () => {
       try {
         const res = await getIssues({ role: "admin" });
-        const data = res.data;
-        setIssues(Array.isArray(data) && data.length > 0 ? data : MOCK_ISSUES);
+        setIssues(Array.isArray(res.data) ? res.data : []);
       } catch {
-        setIssues(MOCK_ISSUES);
+        setIssues([]);
       } finally {
         setLoading(false);
       }
@@ -42,6 +33,33 @@ const DashboardAdmin = () => {
     }
   };
 
+  const getUserStats = () => {
+    const userCount = {};
+    const areaCount = {};
+    
+    issues.forEach(issue => {
+      if (issue.reportedBy) {
+        userCount[issue.reportedBy] = (userCount[issue.reportedBy] || 0) + 1;
+      }
+      if (issue.area) {
+        areaCount[issue.area] = (areaCount[issue.area] || 0) + 1;
+      }
+    });
+
+    const topUsers = Object.entries(userCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }));
+
+    const areaBreakdown = Object.entries(areaCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([area, count]) => ({ area, count }));
+
+    return { totalUsers: Object.keys(userCount).length, topUsers, areaBreakdown };
+  };
+
+  const userStats = getUserStats();
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
@@ -53,17 +71,56 @@ const DashboardAdmin = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      <NavbarAdmin />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-            <p className="text-gray-500">Analytics overview and system-wide issue management</p>
-          </div>
-          <NotificationBell userId="admin-user-id" />
-        </div>
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-12"><MapView issues={issues} /></div>
           <div className="col-span-12"><AnalyticsDashboard issues={issues} /></div>
+          
+          <div className="col-span-12 lg:col-span-6 bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">User Statistics</h3>
+            <div className="mb-4">
+              <p className="text-3xl font-bold text-indigo-600">{userStats.totalUsers}</p>
+              <p className="text-sm text-gray-500">Total Users</p>
+            </div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Top Complainants</h4>
+            {userStats.topUsers.length > 0 ? (
+              <ul className="space-y-2">
+                {userStats.topUsers.map((user, idx) => (
+                  <li key={idx} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-sm text-gray-700 truncate">{user.name}</span>
+                    <span className="text-sm font-semibold text-indigo-600">{user.count}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-400">No data available</p>
+            )}
+          </div>
+
+          <div className="col-span-12 lg:col-span-6 bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Area Breakdown</h3>
+            {userStats.areaBreakdown.length > 0 ? (
+              <ul className="space-y-3">
+                {userStats.areaBreakdown.map((item, idx) => (
+                  <li key={idx}>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-gray-700">{item.area}</span>
+                      <span className="text-sm font-semibold text-indigo-600">{item.count}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-indigo-600 h-2 rounded-full"
+                        style={{ width: `${(item.count / issues.length) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-400">No data available</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
