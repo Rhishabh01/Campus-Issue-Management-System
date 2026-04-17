@@ -58,6 +58,7 @@ export const useAdminNotifications = (refreshInterval = 15000) => {
       
       const derivedNotifications = [];
       const seenIds = new Set();
+      const fetchTime = new Date().toISOString();
 
       newIssues.forEach(issue => {
         const timestamp = issue.createdAt || issue.updatedAt;
@@ -69,7 +70,7 @@ export const useAdminNotifications = (refreshInterval = 15000) => {
             type: 'new',
             title: 'New issue reported',
             description: `${issue.category || 'Issue'} at ${issue.location?.text || 'Unknown location'}`,
-            timestamp,
+            timestamp: fetchTime,
             issueId: issue.id,
           });
         }
@@ -82,7 +83,7 @@ export const useAdminNotifications = (refreshInterval = 15000) => {
               type: 'resolved',
               title: 'Issue resolved',
               description: `${issue.category || 'Issue'} has been resolved`,
-              timestamp: issue.resolvedAt || issue.updatedAt,
+              timestamp: fetchTime,
               issueId: issue.id,
             });
           }
@@ -96,7 +97,7 @@ export const useAdminNotifications = (refreshInterval = 15000) => {
               type: 'in_progress',
               title: 'Issue in progress',
               description: `${issue.category || 'Issue'} is being worked on`,
-              timestamp: issue.updatedAt,
+              timestamp: fetchTime,
               issueId: issue.id,
             });
           }

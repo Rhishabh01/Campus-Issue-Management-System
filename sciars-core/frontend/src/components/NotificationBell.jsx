@@ -22,9 +22,12 @@ const NotificationBell = ({ userId }) => {
       const fetchedNotifications = response.data || [];
       
       const readIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const fetchTime = new Date().toISOString();
       const updatedNotifications = fetchedNotifications.map(n => ({
         ...n,
-        read: readIds.includes(n.id) || n.read
+        read: readIds.includes(n.id) || n.read,
+        _fetchTime: n.createdAt || n.timestamp || n.time || fetchTime,
+        createdAt: n.createdAt || n.timestamp || n.time || fetchTime
       }));
       
       setNotifications(updatedNotifications);
