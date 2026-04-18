@@ -1,76 +1,161 @@
-# Hackathon — [DEV ARENA]
+# Campus Issue Management System
 
-Welcome to the official hackathon repository by [GDG,UCE-OU].
-This repository serves as the starting point for all participating teams.
-Title of your repository shall be : team-(your team name)
+## Overview
 
-## Team Details
+The Campus Issue Management System is a web-based application designed to streamline the process of reporting, tracking, and resolving issues within a campus environment. It provides a centralized platform for students and administrators to efficiently manage campus-related complaints such as infrastructure problems, maintenance requests, and other facility issues.
 
-After forking, fill in your team details below in your fork's README
-
-- **Team Name: Omega-zero**
-- **Team Lead: Md Rahif Uddin Khan**
-- **Team Members:**
-  - Member 1: Md Rahif Uddin Khan
-  - Member 2: Rajesh 
-  - Member 3: G.Pranay
-  - Member 4: P.R Rhishabh
+The system replaces informal communication methods with a structured workflow, improving transparency, accountability, and response time.
 
 ---
 
+## Features
 
-## Getting Started
+* Issue Reporting
+  Users can submit issues with descriptions, categories, and optional images.
 
-### Step 1 — Fork this Repository
-- Click the **Fork** button at the top right of this page
-- Select your GitHub account to fork into
-- You will be redirected to your own copy of this repository
+* Role-Based Access
+  Different interfaces for students, administrators, and supervisors.
 
-### Step 2 — Clone your Fork Locally
-```bash
-git clone https://github.com/your-username/hackathon-repo
-cd hackathon-repo
+* Real-Time Tracking
+  Track the status of reported issues from submission to resolution.
+
+* Automated Workflow
+  Issues are routed to the appropriate authority for faster handling.
+
+* Dashboard Interface
+  Visual overview of reported issues, statuses, and analytics.
+
+* Notification System
+  Alerts for updates, status changes, and actions required.
+
+* Resolution Management
+  Supervisors can mark issues as resolved with proof (e.g., images).
+
+---
+
+## Tech Stack
+
+Frontend:
+
+* React.js
+* HTML, CSS(Tailwind), JavaScript
+
+Backend:
+
+* FastAPI / Node.js (depending on your implementation)
+
+Database:
+
+* MongoDB / MySQL
+
+Other Tools:
+
+* Firebase (for authentication/notifications)
+* Git and GitHub for version control
+
+---
+
+## Project Structure
+
+```
+Campus-Issue-Management-System/
+│
+├── frontend/          # React frontend
+├── backend/           # API and server logic
+├── database/          # Database schemas/config
+├── assets/            # Images and static files
+├── README.md
 ```
 
-### Step 3 — Start Building
-- Work on your project inside your forked repository
-- Commit and push your changes regularly
+---
+
+## Installation
+
+### Prerequisites
+
+* Node.js
+* Python (if using FastAPI)
+* npm or yarn
+* Database (MongoDB/MySQL)
+
+---
+
+### Clone the Repository
 
 ```bash
-git add .
-git commit -m "Your commit message"
-git push origin main
+git clone https://github.com/Rhishabh01/Campus-Issue-Management-System.git
+cd Campus-Issue-Management-System
 ```
+
+---
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+---
+
+### Backend Setup
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+---
+
+## Usage
+
+1. Register or log in to the system
+2. Submit a new issue with relevant details
+3. Track the issue status through the dashboard
+4. Administrators assign and manage issues
+5. Supervisors resolve and update the issue status
 
 ---
 
 ## Problem Statement
 
-Smart Campus Issue Reporting and Management System
+Traditional campus issue reporting relies on informal communication channels, which leads to delays, lack of accountability, and poor tracking. This system introduces a structured and automated solution to ensure efficient issue resolution.
 
 ---
 
-## Submission Guidelines
+## Future Enhancements
 
-- All code must be pushed to your **forked repository**
-- Your repository must be **public**
-- **Submission Deadline:** [17th april 3:59pm]
-
----
-
-## 📋 Rules & Regulations
-
-- Use of AI is permitted
-- Use of open source libraries is permitted
-- Plagiarism will lead to immediate disqualification
-- The decision of the judges will be final
-
----
-## Contact
-
-For any queries, reach out to us at:
-- **contact number** : [7981972900]
+* AI-based issue prioritization
+* Image-based issue detection
+* Mobile application support
+* Advanced analytics and reporting
+* Integration with IoT devices for automated reporting
 
 ---
 
-> Good luck to all participating teams! 
+## Contributing
+
+Contributions are welcome. To contribute:
+
+1. Fork the repository
+2. Create a new branch
+3. Make your changes
+4. Submit a pull request
+
+---
+
+## License
+
+This project is open-source and available under the MIT License.
+
+---
+
+## Author
+
+Rhishabh
+
+---
+
+
