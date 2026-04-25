@@ -3,10 +3,14 @@ import { db } from "../services/firebaseFirestore";
 
 const DEFAULT_ALLOWED_EMAILS = {
   supervisor: [
-    "supervisor1@campus.edu",
-    "supervisor2@campus.edu",
-    "environment@campus.edu",
     "electrical@campus.edu",
+    "water@campus.edu",
+    "clean@campus.edu",
+    "infra@campus.edu",
+    "access@campus.edu",
+    "safety@campus.edu",
+    "transport@campus.edu",
+    "environment@campus.edu",
   ],
   admin: [
     "admin@campus.edu",

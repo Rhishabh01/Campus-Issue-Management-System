@@ -64,7 +64,7 @@ export default function ReportIssue() {
         // Optionally handle standard validation
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = (readerEvent) => {
         const image = new Image();
@@ -179,7 +179,7 @@ export default function ReportIssue() {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavbarUser />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Report an Issue</h1>
@@ -214,9 +214,8 @@ export default function ReportIssue() {
                   setFormData({ ...formData, title: e.target.value });
                   if (errors.title) setErrors({ ...errors, title: "" });
                 }}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
-                  errors.title ? "border-red-500" : "border-gray-300 hover:border-gray-400"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${errors.title ? "border-red-500" : "border-gray-300 hover:border-gray-400"
+                  }`}
               />
               {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
             </div>
@@ -234,11 +233,10 @@ export default function ReportIssue() {
                       setFormData({ ...formData, category: cat.id });
                       if (errors.category) setErrors({ ...errors, category: "" });
                     }}
-                    className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
-                      formData.category === cat.id
-                        ? "border-primary-500 bg-primary-50 text-primary-700"
-                        : "border-gray-200 hover:border-gray-300 text-gray-600"
-                    }`}
+                    className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${formData.category === cat.id
+                      ? "border-primary-500 bg-primary-50 text-primary-700"
+                      : "border-gray-200 hover:border-gray-300 text-gray-600"
+                      }`}
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={cat.icon} />
@@ -262,9 +260,8 @@ export default function ReportIssue() {
                   setFormData({ ...formData, description: e.target.value });
                   if (errors.description) setErrors({ ...errors, description: "" });
                 }}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${
-                  errors.description ? "border-red-500" : "border-gray-300 hover:border-gray-400"
-                }`}
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${errors.description ? "border-red-500" : "border-gray-300 hover:border-gray-400"
+                  }`}
               />
               {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
             </div>
@@ -280,11 +277,10 @@ export default function ReportIssue() {
                       key={pri.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, priority: pri.id })}
-                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
-                        formData.priority === pri.id
-                          ? `${pri.color} border-current`
-                          : "border-gray-200 text-gray-600 hover:border-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${formData.priority === pri.id
+                        ? `${pri.color} border-current`
+                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                        }`}
                     >
                       {pri.label}
                     </button>
@@ -307,9 +303,8 @@ export default function ReportIssue() {
                         setFormData({ ...formData, college: e.target.value });
                         if (errors.location) setErrors({ ...errors, location: "" });
                       }}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white ${
-                        errors.location ? "border-red-500" : "border-gray-300 hover:border-gray-400"
-                      }`}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all appearance-none bg-white ${errors.location ? "border-red-500" : "border-gray-300 hover:border-gray-400"
+                        }`}
                     >
                       <option value="">Select college</option>
                       <option value="Methodist College">Methodist College</option>
@@ -327,9 +322,8 @@ export default function ReportIssue() {
                       setFormData({ ...formData, locationText: e.target.value });
                       if (errors.location) setErrors({ ...errors, location: "" });
                     }}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${
-                      errors.location ? "border-red-500" : "border-gray-300 hover:border-gray-400"
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none ${errors.location ? "border-red-500" : "border-gray-300 hover:border-gray-400"
+                      }`}
                   />
                   <div className="flex gap-2">
                     <button
@@ -337,13 +331,12 @@ export default function ReportIssue() {
                       onClick={handleGPS}
                       disabled={gpsLoading}
                       title="Use my current GPS location"
-                      className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-                        gpsStatus === "success"
-                          ? "bg-green-50 border-green-300 text-green-700"
-                          : gpsStatus === "error"
+                      className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${gpsStatus === "success"
+                        ? "bg-green-50 border-green-300 text-green-700"
+                        : gpsStatus === "error"
                           ? "bg-red-50 border-red-300 text-red-600"
                           : "bg-gray-50 border-gray-300 text-gray-600 hover:bg-primary-50 hover:border-primary-400 hover:text-primary-700"
-                      } disabled:opacity-60 disabled:cursor-not-allowed`}
+                        } disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
                       {gpsLoading ? (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -387,9 +380,8 @@ export default function ReportIssue() {
                 Upload Image (Optional)
               </label>
               <div className="flex gap-4">
-                <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors flex-1 ${
-                  imagePreview ? "border-primary-300 bg-primary-50" : "border-gray-300 hover:border-gray-400"
-                }`}>
+                <div className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors flex-1 ${imagePreview ? "border-primary-300 bg-primary-50" : "border-gray-300 hover:border-gray-400"
+                  }`}>
                   {imagePreview ? (
                     <div className="relative inline-block z-10">
                       <img src={imagePreview} alt="Preview" className="max-h-48 rounded-lg mx-auto" />

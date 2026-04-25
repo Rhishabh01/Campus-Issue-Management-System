@@ -35,7 +35,7 @@ def create_notification(user_id: str, title: str, message: str, issue_id: str):
         "message": message,
         "issueId": issue_id,
         "read": False,
-        "createdAt": datetime.utcnow().isoformat(),
+        "createdAt": datetime.utcnow().isoformat() + "Z",
     }
     db.collection("notifications").add(notification)
 
@@ -101,7 +101,7 @@ def create_issue(issue: IssueCreate):
             },
             "status": "Open",
             "assignedTo": assigned_to,
-            "createdAt": datetime.utcnow().isoformat(),
+            "createdAt": datetime.utcnow().isoformat() + "Z",
             "resolvedAt": None,
             "proofImageUrl": None,
             "supervisorName": None,
@@ -252,7 +252,7 @@ def update_status(id: str, payload: IssueStatusUpdate):
                 update_data["supervisorDescription"] = payload.supervisorDescription
 
         if payload.status == "Closed":
-            update_data["resolvedAt"] = datetime.utcnow().isoformat()
+            update_data["resolvedAt"] = datetime.utcnow().isoformat() + "Z"
             if payload.supervisorName:
                 update_data["supervisorName"] = payload.supervisorName
             if payload.supervisorEmail:
@@ -314,7 +314,7 @@ def verify_issue(id: str, payload: VerifyIssue):
 
         if payload.verified:
             issue_ref.update(
-                {"status": "Closed", "resolvedAt": datetime.utcnow().isoformat()}
+                {"status": "Closed", "resolvedAt": datetime.utcnow().isoformat() + "Z"}
             )
             create_notification(
                 user_id=user_id,

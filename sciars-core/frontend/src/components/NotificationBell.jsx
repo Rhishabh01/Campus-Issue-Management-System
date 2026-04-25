@@ -79,7 +79,7 @@ const NotificationBell = ({ userId }) => {
 
   const formatTime = (timestamp) => {
     if (!timestamp) return 'Unknown';
-    const date = new Date(timestamp);
+    const date = new Date(timestamp.replace('Z', '+00:00'));
     const now = new Date();
     const diffMs = now - date;
     const diffMins = Math.floor(diffMs / 60000);

@@ -6,7 +6,7 @@ const ADMIN_NOTIF_STORAGE_KEY = 'admin_notifications_state';
 const getTimeAgo = (dateString) => {
   if (!dateString) return 'Unknown time';
   const now = new Date();
-  const date = new Date(dateString);
+  const date = new Date(dateString.replace('Z', '+00:00'));
   const diffMs = now - date;
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMins / 60);
