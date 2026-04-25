@@ -2,9 +2,11 @@ import { useState } from "react";
 import IssueCard from "./IssueCard";
 import CameraCapture from "./CameraCapture";
 import { updateStatus } from "../services/api";
+import toast from "react-hot-toast";
 
 const SupervisorTaskList = ({ tasks = [], loading = false, onStatusChange }) => {
   const [resolveModalTaskId, setResolveModalTaskId] = useState(null);
+  const [selectedIssue, setSelectedIssue] = useState(null);
   const [proofImage, setProofImage] = useState(null);
   const [proofPreview, setProofPreview] = useState(null);
   const [resolveNote, setResolveNote] = useState("");
@@ -40,10 +42,45 @@ const SupervisorTaskList = ({ tasks = [], loading = false, onStatusChange }) => 
   const handleProofImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProofImage(file);
+      if (!file.type.startsWith("image/")) {
+        setImageError("Please upload a valid image file.");
+        return;
+      }
       setImageError("");
+      
       const reader = new FileReader();
-      reader.onloadend = () => setProofPreview(reader.result);
+      reader.onload = (readerEvent) => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = image.width;
+          let height = image.height;
+          const MAX_SIZE = 800;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0, width, height);
+
+          // Compress to JPEG with 0.5 quality to ensure small base64 footprint (< 1MiB)
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.5);
+          setProofPreview(dataUrl);
+          setProofImage(dataUrl);
+        };
+        image.src = readerEvent.target.result;
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -59,12 +96,15 @@ const SupervisorTaskList = ({ tasks = [], loading = false, onStatusChange }) => 
       await updateStatus(resolveModalTaskId, {
         status: "Resolved",
         proofImageUrl: proofPreview,
+        supervisorDescription: resolveNote || undefined
       });
       closeResolveModal();
       if (onStatusChange) onStatusChange();
+      toast.success("Issue resolved successfully");
     } catch (err) {
       console.error(err);
-      alert("Failed to mark as resolved. Please try again.");
+      const msg = err?.response?.data?.detail?.message || err?.response?.data?.detail || err.message || "Failed to mark as resolved.";
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -74,12 +114,30 @@ const SupervisorTaskList = ({ tasks = [], loading = false, onStatusChange }) => 
     <>
       <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Loading tasks...</div>
+          <div className="grid grid-cols-1 gap-4">
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-pulse">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/6 ml-auto"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : tasks.length === 0 ? (
           <div className="text-center py-12 text-gray-500">No tasks assigned.</div>
         ) : tasks.map((task) => (
           <div key={task.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <IssueCard issue={task} />
+            <IssueCard issue={task} onClick={() => setSelectedIssue(task)} />
             <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
               {task.status === "Open" && (
                 <button
@@ -271,6 +329,88 @@ const SupervisorTaskList = ({ tasks = [], loading = false, onStatusChange }) => 
                   </>
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Issue Detail Popup Modal */}
+      {selectedIssue && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+          onClick={() => setSelectedIssue(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold text-gray-900">Issue Details</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                  selectedIssue.status === "Open" ? "bg-red-100 text-red-800 border-red-200" :
+                  selectedIssue.status === "In Progress" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                  selectedIssue.status === "Resolved" ? "bg-green-100 text-green-800 border-green-200" :
+                  "bg-gray-100 text-gray-600 border-gray-200"
+                }`}>{selectedIssue.status}</span>
+              </div>
+              <button
+                onClick={() => setSelectedIssue(null)}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5 space-y-5">
+              {/* Image */}
+              <div>
+                {selectedIssue.imageUrl || selectedIssue.proofImageUrl ? (
+                  <img 
+                    src={selectedIssue.proofImageUrl || selectedIssue.imageUrl} 
+                    alt="Issue Proof" 
+                    className="w-full max-h-64 object-contain sm:object-cover rounded-xl border border-gray-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-gray-50 flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-400">
+                    <svg className="w-8 h-8 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">No image provided</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Category */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Category</p>
+                <p className="text-sm font-medium text-gray-800">{selectedIssue.category || "—"}</p>
+              </div>
+
+              {/* Description */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Description</p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedIssue.description || "—"}</p>
+              </div>
+
+              {/* Location text */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Location</p>
+                <p className="text-sm text-gray-700">{selectedIssue.location?.text || "Not specified"}</p>
+              </div>
+              
+              {/* Supervisor Notes */}
+              {selectedIssue.supervisorDescription && (
+                <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
+                  <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Resolution Note</p>
+                  <p className="text-sm text-green-800 whitespace-pre-wrap">{selectedIssue.supervisorDescription}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

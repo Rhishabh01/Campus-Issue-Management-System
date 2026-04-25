@@ -75,7 +75,7 @@ const MapView = ({ issues = [], center = [17.4126, 78.5247], zoom = 15, classNam
           ]}
           pathOptions={{ color: '#dc2626', weight: 3, dashArray: '10, 10', fillColor: '#dc2626', fillOpacity: 0.08 }}
         />
-        {issues.map((issue, index) => (
+        {issues.filter(i => i.location && i.location.lat != null && i.location.lng != null).map((issue, index) => (
           <Marker
             key={issue.id || index}
             position={[issue.location.lat, issue.location.lng]}

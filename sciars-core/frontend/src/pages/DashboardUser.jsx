@@ -16,7 +16,8 @@ export default function DashboardUser() {
   const [issues, setIssues] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const user = { email: "user1@gmail.com" }; // Mock integration
+  const userStr = localStorage.getItem("session_user");
+  const user = userStr ? JSON.parse(userStr) : { email: "user1@gmail.com" };
 
   const categories = [
     { id: "Infrastructure", label: "Infrastructure" },
@@ -25,6 +26,8 @@ export default function DashboardUser() {
     { id: "Safety", label: "Safety" },
     { id: "Transport", label: "Transport" },
     { id: "Environment", label: "Environment" },
+    { id: "Water", label: "Water" },
+    { id: "Accessibility", label: "Accessibility" },
   ];
 
   const colleges = [
@@ -196,7 +199,25 @@ export default function DashboardUser() {
             <div>
               <h2 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Issue List</h2>
               {loading ? (
-                <div className="text-center py-12 text-gray-400">Loading issues...</div>
+                <div className="grid grid-cols-1 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-pulse">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/6 ml-auto"></div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-full"></div>
+                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <div className="w-4 h-4 bg-gray-200 rounded"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : filteredIssues.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {filteredIssues.map((issue) => (
@@ -271,6 +292,23 @@ export default function DashboardUser() {
 
             {/* Body — only user-provided fields */}
             <div className="px-6 py-5 space-y-4">
+              {/* Image */}
+              <div className="mb-4">
+                {selectedIssue.imageUrl || selectedIssue.proofImageUrl ? (
+                  <img 
+                    src={selectedIssue.proofImageUrl || selectedIssue.imageUrl} 
+                    alt="Issue Proof" 
+                    className="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-full h-40 bg-gray-50 flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 text-gray-400">
+                    <svg className="w-8 h-8 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-sm">No image provided</span>
+                  </div>
+                )}
+              </div>
 
               {/* Category */}
               <div>

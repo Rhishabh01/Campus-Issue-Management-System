@@ -82,12 +82,23 @@ const CameraCapture = ({ isOpen, onClose, onCapture, aspectRatio = "4/3" }) => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const MAX_SIZE = 800;
+    let width = video.videoWidth;
+    let height = video.videoHeight;
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (width > height && width > MAX_SIZE) {
+      height *= MAX_SIZE / width;
+      width = MAX_SIZE;
+    } else if (height > MAX_SIZE) {
+      width *= MAX_SIZE / height;
+      height = MAX_SIZE;
+    }
 
-    const imageData = canvas.toDataURL("image/jpeg", 0.85);
+    canvas.width = width;
+    canvas.height = height;
+    context.drawImage(video, 0, 0, width, height);
+
+    const imageData = canvas.toDataURL("image/jpeg", 0.5);
     setCapturedImage(imageData);
     stopCamera();
   };

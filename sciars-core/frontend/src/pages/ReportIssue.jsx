@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import NavbarUser from "../components/NavbarUser";
 import CameraCapture from "../components/CameraCapture";
 import { createIssue } from "../services/api";
@@ -11,7 +12,9 @@ const mapCategory = (cat) => {
     sanitation: "Cleanliness",
     safety: "Safety",
     transport: "Transport",
-    environment: "Environment"
+    environment: "Environment",
+    water: "Water",
+    accessibility: "Accessibility"
   };
   return map[cat] || "Other";
 };
@@ -23,6 +26,8 @@ const categories = [
   { id: "safety", label: "Public Safety", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
   { id: "transport", label: "Transportation", icon: "M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" },
   { id: "environment", label: "Environment", icon: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" },
+  { id: "water", label: "Water", icon: "M3 15a4 4 0 004 4h10a4 4 0 004-4V7a4 4 0 00-4-4H7a4 4 0 00-4 4v8zM8 11V7a1 1 0 112 0v4a1 1 0 11-2 0zM14 11V7a1 1 0 112 0v4a1 1 0 11-2 0z" },
+  { id: "accessibility", label: "Accessibility", icon: "M12 14c-1.39 0-2.61-.71-3.35-1.8l-1.04-1.54C7.14 10.1 7 9.56 7 9c0-1.66 1.34-3 3-3h4c1.66 0 3 1.34 3 3 0 .56-.14 1.1-.41 1.56L15.55 12.1c-.74 1.09-1.96 1.8-3.35 1.8z" }
 ];
 
 const priorities = [
@@ -55,9 +60,45 @@ export default function ReportIssue() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData({ ...formData, image: file });
+      if (!file.type.startsWith("image/")) {
+        // Optionally handle standard validation
+        return;
+      }
+      
       const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result);
+      reader.onload = (readerEvent) => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = image.width;
+          let height = image.height;
+          const MAX_SIZE = 800;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(image, 0, 0, width, height);
+
+          // Compress to JPEG with 0.5 quality to ensure small base64 footprint (< 1MiB)
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.5);
+          setImagePreview(dataUrl);
+          // Set abstract file for validation
+          setFormData({ ...formData, image: dataUrl });
+        };
+        image.src = readerEvent.target.result;
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -101,7 +142,8 @@ export default function ReportIssue() {
 
     setIsSubmitting(true);
     try {
-      const user = { email: "user1@gmail.com" };
+      const userStr = localStorage.getItem("session_user");
+      const user = userStr ? JSON.parse(userStr) : { email: "user1@gmail.com" };
 
       const payload = {
         userId: user.email,
@@ -117,18 +159,19 @@ export default function ReportIssue() {
       const res = await createIssue(payload);
 
       if (res.data && res.data.duplicate) {
-        alert("This issue has already been reported! Your report has been successfully merged to help increase its priority.");
+        toast.success("This issue has already been reported! Your report has been successfully merged to help increase its priority.");
         setIsSubmitting(false);
+        setTimeout(() => navigate("/user"), 2000);
         return;
       }
 
-      alert("Issue submitted successfully");
+      toast.success("Issue submitted successfully");
       setIsSubmitting(false);
-      setTimeout(() => navigate("/user"), 500);
+      setTimeout(() => navigate("/user"), 1000);
     } catch (err) {
       console.error(err);
       const msg = err?.response?.data?.detail?.message || err?.response?.data?.detail || "Failed to submit issue to backend.";
-      alert(msg);
+      toast.error(msg);
       setIsSubmitting(false);
     }
   };
