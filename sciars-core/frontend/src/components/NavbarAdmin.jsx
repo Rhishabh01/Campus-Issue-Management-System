@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AdminNotificationBell from './AdminNotificationBell';
 import { getIssues } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const NavbarAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { logout } = useAuth();
 
   const adminEmail = useMemo(() => {
     try {
@@ -20,6 +22,11 @@ const NavbarAdmin = () => {
   }, []);
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   const navLinks = [
     {
@@ -82,7 +89,7 @@ const NavbarAdmin = () => {
 
             {/* Logout */}
             <button
-              onClick={() => navigate('/')}
+              onClick={handleLogout}
               className="p-2 text-gray-500 hover:text-red-600 transition-colors"
               aria-label="Logout"
             >

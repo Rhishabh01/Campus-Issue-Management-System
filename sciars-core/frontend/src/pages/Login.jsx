@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   const [name, setName] = useState("");
@@ -13,10 +15,11 @@ export default function Login() {
   const [selectedRole, setSelectedRole] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const navigate = useNavigate();
+  const { login, register, firebaseErrorMessage } = useAuth();
 
   const validateForm = () => {
     const newErrors = {};
-    if (isRegistering && !name.trim()) {
+    if (isRegistering && selectedRole === "user" && !name.trim()) {
       newErrors.name = "Full name is required";
     }
     if (!email) {
@@ -29,7 +32,7 @@ export default function Login() {
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    if (isRegistering && password !== confirmPassword) {
+    if (isRegistering && selectedRole === "user" && password !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
     setErrors(newErrors);
@@ -41,13 +44,23 @@ export default function Login() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      localStorage.setItem("session_" + selectedRole, JSON.stringify({ email, role: selectedRole }));
+    try {
+      if (isRegistering) {
+        await register(email, password, name, selectedRole);
+        toast.success("Account created successfully!");
+      } else {
+        await login(email, password, selectedRole);
+        toast.success("Welcome back!");
+      }
       if (selectedRole === "user") navigate("/user");
       else if (selectedRole === "supervisor") navigate("/supervisor");
       else navigate("/admin");
-    }, 1500);
+    } catch (err) {
+      const code = err.code || "";
+      toast.error(firebaseErrorMessage(code));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!selectedRole) {
@@ -57,7 +70,7 @@ export default function Login() {
           <h2 className="text-3xl font-bold text-white mb-2">Select Account Type</h2>
           <p className="text-slate-400 mb-8">Choose how you want to log in to SCIARS</p>
           <div className="space-y-4">
-            {['user', 'supervisor', 'admin'].map((role) => (
+            {['user'].map((role) => (
               <button
                 key={role}
                 onClick={() => setSelectedRole(role)}
@@ -72,6 +85,33 @@ export default function Login() {
                     {role === 'user' && (
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                     )}
+                  </div>
+                  <span className="text-lg">Login as {role.charAt(0).toUpperCase() + role.slice(1)}</span>
+                </div>
+                <svg className="w-5 h-5 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            ))}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-700" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-slate-800/50 text-slate-500">
+                  Staff Login
+                </span>
+              </div>
+            </div>
+            {['supervisor', 'admin'].map((role) => (
+              <button
+                key={role}
+                onClick={() => setSelectedRole(role)}
+                className="w-full py-4 px-6 bg-slate-900/50 hover:bg-slate-700 border border-slate-700 rounded-xl text-white font-semibold flex items-center justify-between transition-all duration-200 group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`p-2 rounded-lg ${
+                    role === 'supervisor' ? 'bg-purple-500/20 text-purple-400' :
+                    'bg-emerald-500/20 text-emerald-400'
+                  }`}>
                     {role === 'supervisor' && (
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                     )}
@@ -126,7 +166,7 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {isRegistering && (
+            {isRegistering && selectedRole === "user" && (
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
                   Full Name
@@ -402,13 +442,20 @@ export default function Login() {
           </div>
 
           <p className="mt-8 text-center text-sm text-slate-500">
-            {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button
-              onClick={() => setIsRegistering(!isRegistering)}
-              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
-            >
-              {isRegistering ? "Sign in instead" : "Create account"}
-            </button>
+            {selectedRole === "user" && (
+              <>
+                {isRegistering ? "Already have an account?" : "Don't have an account?"}{" "}
+                <button
+                  onClick={() => setIsRegistering(!isRegistering)}
+                  className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                >
+                  {isRegistering ? "Sign in instead" : "Create account"}
+                </button>
+              </>
+            )}
+            {selectedRole !== "user" && (
+              <span className="text-slate-400 text-sm">Contact admin to create account</span>
+            )}
           </p>
         </div>
 

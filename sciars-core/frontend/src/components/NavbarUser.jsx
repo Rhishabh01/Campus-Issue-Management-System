@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
+import { useAuth } from '../contexts/AuthContext';
 
 const NavbarUser = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { logout } = useAuth();
 
   const userEmail = useMemo(() => {
     try {
@@ -19,6 +21,11 @@ const NavbarUser = () => {
   }, []);
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -59,7 +66,7 @@ const NavbarUser = () => {
           <div className="flex items-center gap-4">
             <NotificationBell userId={userEmail} />
             <button 
-              onClick={() => navigate('/')}
+              onClick={handleLogout}
               className="p-2 text-gray-500 hover:text-red-600 transition-colors" 
               aria-label="Logout"
             >

@@ -1,7 +1,22 @@
 import axios from "axios";
+import { auth } from "./firebase";
 
 const API = axios.create({
   baseURL: "http://localhost:8000/api"
+});
+
+// Attach Firebase ID token to every request
+API.interceptors.request.use(async (config) => {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (err) {
+    console.warn("Could not attach auth token:", err.message);
+  }
+  return config;
 });
 
 // CREATE ISSUE

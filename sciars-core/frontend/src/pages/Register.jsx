@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register: registerUser, firebaseErrorMessage } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -55,10 +58,17 @@ export default function Register() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const displayName = `${formData.firstName} ${formData.lastName}`.trim();
+      await registerUser(formData.email, formData.password, displayName, "user");
+      toast.success("Account created successfully!");
       navigate("/user");
-    }, 1500);
+    } catch (err) {
+      const code = err.code || "";
+      toast.error(firebaseErrorMessage(code));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (field) => (e) => {

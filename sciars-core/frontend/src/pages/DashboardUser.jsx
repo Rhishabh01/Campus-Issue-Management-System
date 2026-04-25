@@ -34,7 +34,7 @@ export default function DashboardUser() {
     { id: "Methodist College", label: "Methodist College" },
     { id: "OU College", label: "OU College" },
   ];
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -79,7 +79,7 @@ export default function DashboardUser() {
   const filteredIssues = issues.filter(issue => {
     const statusMatch = selectedFilter === "all" || issue.status === selectedFilter;
     const categoryMatch = !selectedCategory || issue.category === selectedCategory;
-    const collegeMatch = !selectedCollege || 
+    const collegeMatch = !selectedCollege ||
       (issue.college && issue.college === selectedCollege) ||
       (issue.location?.text && issue.location.text.toLowerCase().includes(selectedCollege.toLowerCase()));
     return statusMatch && categoryMatch && collegeMatch;
@@ -88,7 +88,7 @@ export default function DashboardUser() {
   return (
     <div className="min-h-screen bg-gray-50">
       <NavbarUser />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
           <div>
@@ -131,11 +131,10 @@ export default function DashboardUser() {
                 <button
                   key={filter.id}
                   onClick={() => setSelectedFilter(filter.id)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    selectedFilter === filter.id
-                      ? "bg-primary-600 text-white shadow-md"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${selectedFilter === filter.id
+                    ? "bg-primary-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
                 >
                   {filter.label}
                 </button>
@@ -199,7 +198,7 @@ export default function DashboardUser() {
             <div>
               <h2 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Issue List</h2>
               {loading ? (
-                <div className="grid grid-cols-1 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {[1, 2, 3].map((n) => (
                     <div key={n} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-pulse">
                       <div className="flex items-center gap-3 mb-4">
@@ -219,7 +218,7 @@ export default function DashboardUser() {
                   ))}
                 </div>
               ) : filteredIssues.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                   {filteredIssues.map((issue) => (
                     <IssueCard key={issue.id} issue={issue} onClick={() => setSelectedIssue(issue)} />
                   ))}
@@ -246,13 +245,13 @@ export default function DashboardUser() {
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold mb-1">Want to make a difference?</h3>
-              <p className="text-primary-100">Report an issue in your community and help improve your neighborhood.</p>
+              <p className="text-primary-100">Report an issue to help improve our campus.</p>
             </div>
             <button
               onClick={() => navigate("/report")}
               className="mt-4 md:mt-0 bg-white text-primary-600 px-5 py-2.5 rounded-lg font-medium hover:bg-gray-100 transition-colors"
             >
-              Report an Issue
+              Report Issue
             </button>
           </div>
         </div>
@@ -273,12 +272,11 @@ export default function DashboardUser() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <span className="text-base font-bold text-gray-900">Issue Report</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                  selectedIssue.status === "Open" ? "bg-red-100 text-red-800 border-red-200" :
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${selectedIssue.status === "Open" ? "bg-red-100 text-red-800 border-red-200" :
                   selectedIssue.status === "In Progress" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
-                  selectedIssue.status === "Resolved" ? "bg-green-100 text-green-800 border-green-200" :
-                  "bg-gray-100 text-gray-600 border-gray-200"
-                }`}>{selectedIssue.status}</span>
+                    selectedIssue.status === "Resolved" ? "bg-green-100 text-green-800 border-green-200" :
+                      "bg-gray-100 text-gray-600 border-gray-200"
+                  }`}>{selectedIssue.status}</span>
               </div>
               <button
                 onClick={() => setSelectedIssue(null)}
@@ -295,9 +293,9 @@ export default function DashboardUser() {
               {/* Image */}
               <div className="mb-4">
                 {selectedIssue.imageUrl || selectedIssue.proofImageUrl ? (
-                  <img 
-                    src={selectedIssue.proofImageUrl || selectedIssue.imageUrl} 
-                    alt="Issue Proof" 
+                  <img
+                    src={selectedIssue.proofImageUrl || selectedIssue.imageUrl}
+                    alt="Issue Proof"
                     className="w-full h-48 object-cover rounded-xl border border-gray-200 shadow-sm"
                   />
                 ) : (
