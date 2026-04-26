@@ -35,4 +35,8 @@ export const verifyIssue = (id, data) => API.post(`/issues/${id}/verify`, data);
 export const getNotifications = (userId) =>
   API.get(`/notifications/${userId}`);
 
+export const syncUserRole = (role, token) => API.post("/users/sync", { role }, {
+  headers: token ? { Authorization: `Bearer ${token}` } : {}
+});
+
 export default API;

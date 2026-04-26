@@ -7,8 +7,8 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "../services/firebase";
+import { syncUserRole } from "../services/api";
 import toast from "react-hot-toast";
-import { isEmailAllowed } from "../config/allowedEmails";
 
 const AuthContext = createContext(null);
 
@@ -65,15 +65,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password, selectedRole) => {
-    if (selectedRole === "supervisor" || selectedRole === "admin") {
-      const allowed = await isEmailAllowed(email, selectedRole);
-      if (!allowed) {
-        throw new Error(`auth/not-allowed`);
-      }
-    }
-
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
+
+    try {
+      const token = await fbUser.getIdToken();
+      await syncUserRole(selectedRole, token);
+    } catch (err) {
+      await signOut(auth);
+      throw new Error("auth/not-allowed");
+    }
 
     const sessionData = {
       email: fbUser.email,
@@ -90,15 +91,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (email, password, displayName, selectedRole) => {
-    if (selectedRole === "supervisor" || selectedRole === "admin") {
-      throw new Error("auth/registration-disabled");
-    }
-
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
 
     if (displayName) {
       await updateProfile(fbUser, { displayName });
+    }
+
+    try {
+      const token = await fbUser.getIdToken();
+      await syncUserRole(selectedRole, token);
+    } catch (err) {
+      await signOut(auth);
+      throw new Error("auth/not-allowed");
     }
 
     const sessionData = {
