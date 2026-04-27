@@ -28,7 +28,7 @@ app.add_middleware(
 
 app.include_router(issues.router, prefix="/api/issues", tags=["Issues"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
-app.include_router(users.router, prefix="/api/users/sync", tags=["Users"])
+app.include_router(users.router, prefix="/api/users", tags=["Users"])
 
 # =========================
 # ROOT CHECK
