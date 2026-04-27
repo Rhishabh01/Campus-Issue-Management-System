@@ -11,16 +11,12 @@ app = FastAPI()
 # CORS CONFIGURATION
 # =========================
 
-# Read allowed origins from environment variable
-# (fallback includes your local + deployed frontend)
-CORS_ORIGINS = os.getenv(
-    "CORS_ORIGINS",
-    "http://localhost:5173,https://project-krqoz-548s7oc9h-rhishabh01s-projects.vercel.app"
-).split(",")
+# Allow all for now - can be restricted later via environment variable
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,   # ✅ Correct origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
