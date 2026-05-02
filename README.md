@@ -189,7 +189,15 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 ## Simple testing if it is Live or Not
 * Login on Student 
 * UserID:  estudent1@gmail.com
-* Pass: estudent1@gmail.com
-## License
+* Pass: 123123123
+* If it logs in and shows issues it is working
 
-This project is for academic and development purposes.
+
+## License and Usage
+
+This project is proprietary.
+
+All rights are reserved by the authors. No part of this codebase may be copied, modified, distributed, or used in any form without explicit permission.
+
+Forking this repository does not grant any rights to use or reuse the code for personal, academic, or commercial purposes.
+
