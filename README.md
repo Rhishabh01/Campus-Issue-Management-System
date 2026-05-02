@@ -188,7 +188,7 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 ---
 ## Simple testing if it is Live or Not
 * Login on Student 
-* UserID:  estudent1@gmail.com
+* UserID:  estudent1@email.com
 * Pass: 123123123
 * If it logs in and shows issues it is working
 
