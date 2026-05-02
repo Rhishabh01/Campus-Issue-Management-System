@@ -1,7 +1,11 @@
 import axios from "axios";
 import { auth } from "./firebase";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+// Production backend URL — hardcoded as fallback because .env is gitignored
+// and Vercel env vars can be unreliable across preview/production environments
+const API_URL = import.meta.env.VITE_API_URL || "https://campus-issue-management-system.onrender.com";
+
+console.log("🔗 API Base URL:", API_URL);
 
 const API = axios.create({
   baseURL: `${API_URL}/api`
