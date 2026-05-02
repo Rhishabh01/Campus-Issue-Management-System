@@ -11,7 +11,6 @@ class RoleSyncRequest(BaseModel):
 
 @router.post("/sync")
 def sync_user_role(payload: RoleSyncRequest, user=Depends(get_current_user)):
-    return {"message": "User synced successfully"}
     try:
         user_uid = user.get("uid")
         user_email = user.get("email", "").lower()
