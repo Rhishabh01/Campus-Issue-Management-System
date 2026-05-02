@@ -24,13 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================
-# PREFLIGHT HANDLER (FIX)
-# =========================
-
-@app.options("/{full_path:path}")
-async def preflight_handler(request: Request):
-    return {}
 
 # =========================
 # ROUTES
