@@ -13,7 +13,7 @@ app = FastAPI()
 
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "https://project-krqoz-8dbi04osj-rhishabh01s-projects.vercel.app"
+    "https://project-krqoz-r08cbf48z-rhishabh01s-projects.vercel.app/"
 ).split(",")
 
 app.add_middleware(
