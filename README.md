@@ -186,7 +186,10 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 * Issue prioritization using AI
 
 ---
-
+## Simple testing if it is Live or Not
+* Login on Student 
+* UserID:  estudent1@gmail.com
+* Pass: estudent1@gmail.com
 ## License
 
 This project is for academic and development purposes.
