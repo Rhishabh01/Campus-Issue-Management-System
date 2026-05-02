@@ -11,7 +11,11 @@ app = FastAPI()
 # CORS CONFIGURATION
 # =========================
 
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
+# Use env OR fallback (important)
+CORS_ORIGINS = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173,https://your-vercel-app.vercel.app"
+).split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,7 +42,7 @@ def root():
     return {"message": "SCIARS API is running 🚀"}
 
 # =========================
-# LOCAL RUN (optional)
+# LOCAL RUN
 # =========================
 
 if __name__ == "__main__":
