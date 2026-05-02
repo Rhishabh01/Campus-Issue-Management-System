@@ -14,6 +14,7 @@ app = FastAPI()
 # Use env OR fallback (important)
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
+    "https://project-krqoz-8dbi04osj-rhishabh01s-projects.vercel.app",
     "http://localhost:5173,https://your-vercel-app.vercel.app"
 ).split(",")
 
