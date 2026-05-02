@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import issues, notifications, users
@@ -11,7 +11,6 @@ app = FastAPI()
 # CORS CONFIGURATION
 # =========================
 
-# Use env OR fallback (important)
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
     "https://project-krqoz-8dbi04osj-rhishabh01s-projects.vercel.app"
@@ -20,10 +19,18 @@ CORS_ORIGINS = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,   # 🔴 MUST be False with "*"
+    allow_credentials=False,   # MUST be False with "*"
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# =========================
+# PREFLIGHT HANDLER (FIX)
+# =========================
+
+@app.options("/{full_path:path}")
+async def preflight_handler(request: Request):
+    return {}
 
 # =========================
 # ROUTES
