@@ -18,7 +18,17 @@ def get_current_user(request: Request):
         raise HTTPException(
             status_code=401,
             detail={"success": False, "message": "Missing or invalid authorization header"},
-        )
+        )from fastapi import Request
+
+def get_current_user(request: Request):
+    # 🔥 Allow preflight requests to pass
+    if request.method == "OPTIONS":
+        return None
+
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header:
+        raise HTTPException(status_code=401, detail="Missing token")
 
     token = auth_header.split("Bearer ")[1]
 
