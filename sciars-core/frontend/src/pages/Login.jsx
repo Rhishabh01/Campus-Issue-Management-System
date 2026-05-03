@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
@@ -16,8 +16,15 @@ export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const { login, register, firebaseErrorMessage } = useAuth();
+  const { user, role, loading, login, register, firebaseErrorMessage } = useAuth();
 
+  useEffect(() => {
+    if (!loading && user && role) {
+      if (role === "user") navigate("/user");
+      else if (role === "supervisor") navigate("/supervisor");
+      else if (role === "admin") navigate("/admin");
+    }
+  }, [user, role, loading, navigate]);
   const validateForm = () => {
     const newErrors = {};
     if (isRegistering && !name.trim()) {
