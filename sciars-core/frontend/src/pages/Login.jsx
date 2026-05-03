@@ -80,9 +80,12 @@ export default function Login() {
       else if (selectedRole === "supervisor") navigate("/supervisor");
       else navigate("/admin");
     } catch (err) {
+      console.error("Google Sign-In error:", err);
       const code = err.code || err.message || "";
-      if (code.includes("popup-closed-by-user")) {
-        // User closed the popup, no error needed
+      if (code.includes("popup-closed-by-user") || code.includes("cancelled-popup-request")) {
+        // User closed the popup or it was cancelled, no error toast needed
+      } else if (code.includes("popup-blocked")) {
+        toast.error("Popup was blocked by your browser. Please allow popups for this site.");
       } else {
         toast.error(firebaseErrorMessage(code));
       }
