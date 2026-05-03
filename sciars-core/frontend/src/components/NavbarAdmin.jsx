@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AdminNotificationBell from './AdminNotificationBell';
 import { getIssues } from '../services/api';
@@ -8,18 +8,9 @@ const NavbarAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
 
-  const adminEmail = useMemo(() => {
-    try {
-      const session = localStorage.getItem('session_admin');
-      if (session) {
-        const data = JSON.parse(session);
-        return data.email || 'admin@sciars.edu';
-      }
-    } catch {}
-    return 'admin@sciars.edu';
-  }, []);
+  const adminEmail = authUser?.email || 'admin@sciars.edu';
 
   const isActive = (path) => location.pathname === path;
 

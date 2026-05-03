@@ -101,8 +101,10 @@ const AdminNotificationBell = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 max-h-[500px] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 flex items-center justify-between">
+        <>
+          <div className="fixed inset-0 bg-black/20 z-40 md:hidden" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-x-3 top-16 z-50 md:absolute md:inset-auto md:right-0 md:top-auto md:mt-2 md:w-96 max-h-[80vh] md:max-h-[500px] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-white">Admin Notifications</h3>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
@@ -176,6 +178,7 @@ const AdminNotificationBell = () => {
             </div>
           )}
         </div>
+        </>
       )}
     </div>
   );

@@ -4,10 +4,12 @@ import NavbarUser from "../components/NavbarUser";
 import IssueCard from "../components/IssueCard";
 import MapView from "../components/MapView";
 import { getIssues, getNotifications } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function DashboardUser() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user: authUser } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -16,8 +18,7 @@ export default function DashboardUser() {
   const [issues, setIssues] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const userStr = localStorage.getItem("session_user");
-  const user = userStr ? JSON.parse(userStr) : { email: "user1@gmail.com" };
+  const userEmail = authUser?.email || "";
 
   const categories = [
     { id: "Infrastructure", label: "Infrastructure" },
@@ -36,9 +37,10 @@ export default function DashboardUser() {
   ];
 
   useEffect(() => {
+    if (!userEmail) return;
     const fetchData = async () => {
       try {
-        const res = await getIssues({ role: "user", userId: user.email });
+        const res = await getIssues({ role: "user", userId: userEmail });
         setIssues(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error(err);
@@ -47,12 +49,13 @@ export default function DashboardUser() {
       }
     };
     fetchData();
-  }, [location.key]);
+  }, [location.key, userEmail]);
 
   useEffect(() => {
+    if (!userEmail) return;
     const fetchNotifs = async () => {
       try {
-        const res = await getNotifications(user.email);
+        const res = await getNotifications(userEmail);
         setNotifications(res.data || []);
       } catch (err) {
         console.error(err);
@@ -61,7 +64,7 @@ export default function DashboardUser() {
     fetchNotifs();
     const interval = setInterval(fetchNotifs, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userEmail]);
 
   const stats = [
     { label: "Total Reported", value: issues.length, icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", color: "bg-blue-500" },
