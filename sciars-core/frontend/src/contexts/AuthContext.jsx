@@ -8,6 +8,8 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   setPersistence,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { syncUserRole } from "../services/api";
@@ -153,6 +155,41 @@ export const AuthProvider = ({ children }) => {
     return fbUser;
   };
 
+  const loginWithGoogle = async (selectedRole) => {
+    // 1. Set persistence to local (Google sign-in = remember me)
+    await setPersistence(auth, browserLocalPersistence);
+
+    // 2. Sign in with Google popup
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const fbUser = result.user;
+
+    // 3. Sync role with backend
+    try {
+      const token = await fbUser.getIdToken();
+      await syncUserRole(selectedRole, token);
+    } catch (err) {
+      await signOut(auth);
+      throw new Error("auth/not-allowed");
+    }
+
+    // 4. Store session metadata
+    const sessionData = {
+      email: fbUser.email,
+      role: selectedRole,
+      uid: fbUser.uid,
+      displayName: fbUser.displayName || "",
+      persistent: true,
+    };
+
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    sessionStorage.removeItem(SESSION_KEY);
+
+    setRole(selectedRole);
+    setUser(fbUser);
+    return fbUser;
+  };
+
   const logout = async () => {
     await signOut(auth);
     localStorage.removeItem(SESSION_KEY);
@@ -170,6 +207,7 @@ export const AuthProvider = ({ children }) => {
     role,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     firebaseErrorMessage,

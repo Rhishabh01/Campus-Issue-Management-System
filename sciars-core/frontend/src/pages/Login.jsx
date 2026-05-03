@@ -16,7 +16,7 @@ export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const { user, role, loading, login, register, firebaseErrorMessage } = useAuth();
+  const { user, role, loading, login, loginWithGoogle, register, firebaseErrorMessage } = useAuth();
 
   useEffect(() => {
     if (!loading && user && role) {
@@ -66,6 +66,26 @@ export default function Login() {
     } catch (err) {
       const code = err.code || "";
       toast.error(firebaseErrorMessage(code));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await loginWithGoogle(selectedRole);
+      toast.success("Welcome!");
+      if (selectedRole === "user") navigate("/user");
+      else if (selectedRole === "supervisor") navigate("/supervisor");
+      else navigate("/admin");
+    } catch (err) {
+      const code = err.code || err.message || "";
+      if (code.includes("popup-closed-by-user")) {
+        // User closed the popup, no error needed
+      } else {
+        toast.error(firebaseErrorMessage(code));
+      }
     } finally {
       setIsLoading(false);
     }
@@ -432,7 +452,11 @@ export default function Login() {
             </div>
 
             <div className="mt-6">
-              <button className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-slate-700/50 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 hover:text-white transition-all duration-200">
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-slate-700/50 hover:bg-slate-700 border border-slate-700 rounded-lg text-slate-300 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
                 </svg>
