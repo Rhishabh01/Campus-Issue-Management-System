@@ -15,6 +15,8 @@ import toast from "react-hot-toast";
 
 const AuthContext = createContext(null);
 
+const SESSION_KEY = "sciars_auth_session";
+
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
@@ -37,16 +39,17 @@ const firebaseErrorMessage = (code) => {
   return map[code] || "Authentication failed. Please try again.";
 };
 
-// Helper to restore role from localStorage session keys
-const restoreRoleFromStorage = () => {
+// Helper to get session data from either storage
+const getStoredSession = () => {
+  const local = localStorage.getItem(SESSION_KEY);
+  if (local) return JSON.parse(local);
+  const session = sessionStorage.getItem(SESSION_KEY);
+  if (session) return JSON.parse(session);
+  
+  // Fallback for old multi-key system
   for (const r of ["user", "supervisor", "admin"]) {
-    const session = localStorage.getItem(`session_${r}`);
-    if (session) {
-      try {
-        const data = JSON.parse(session);
-        if (data.email) return r;
-      } catch {}
-    }
+    const old = localStorage.getItem(`session_${r}`);
+    if (old) return JSON.parse(old);
   }
   return null;
 };
@@ -57,21 +60,20 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Eagerly restore role from localStorage so ProtectedRoute doesn't
-    // redirect before onAuthStateChanged has a chance to fire
-    const storedRole = restoreRoleFromStorage();
-    if (storedRole) setRole(storedRole);
+    // Eagerly restore role from storage
+    const session = getStoredSession();
+    if (session?.role) {
+      setRole(session.role);
+    }
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        // Firebase user exists — restore role from localStorage
-        const restoredRole = restoreRoleFromStorage();
-        if (restoredRole) {
-          setRole(restoredRole);
+        const session = getStoredSession();
+        if (session?.role) {
+          setRole(session.role);
         }
       } else {
-        // User signed out or session expired
         setRole(null);
       }
       setLoading(false);
@@ -81,14 +83,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password, selectedRole, rememberMe = false) => {
-    // Set persistence BEFORE signing in:
-    // - LOCAL: persists across browser restarts (Remember Me checked)
-    // - SESSION: cleared when tab/browser closes (Remember Me unchecked)
+    // 1. Set Firebase persistence
     await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
 
+    // 2. Sign in
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
 
+    // 3. Sync role with backend
     try {
       const token = await fbUser.getIdToken();
       await syncUserRole(selectedRole, token);
@@ -97,24 +99,31 @@ export const AuthProvider = ({ children }) => {
       throw new Error("auth/not-allowed");
     }
 
+    // 4. Store session metadata
     const sessionData = {
       email: fbUser.email,
       role: selectedRole,
       uid: fbUser.uid,
       displayName: fbUser.displayName || "",
+      persistent: rememberMe
     };
 
-    localStorage.setItem(`session_${selectedRole}`, JSON.stringify(sessionData));
+    // Use appropriate storage based on rememberMe
+    if (rememberMe) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+      sessionStorage.removeItem(SESSION_KEY);
+    } else {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+      localStorage.removeItem(SESSION_KEY);
+    }
+
     setRole(selectedRole);
     setUser(fbUser);
-
     return fbUser;
   };
 
   const register = async (email, password, displayName, selectedRole) => {
-    // Registration always uses local persistence
     await setPersistence(auth, browserLocalPersistence);
-
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
 
@@ -135,17 +144,20 @@ export const AuthProvider = ({ children }) => {
       role: selectedRole,
       uid: fbUser.uid,
       displayName: displayName || "",
+      persistent: true
     };
 
-    localStorage.setItem(`session_${selectedRole}`, JSON.stringify(sessionData));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
     setRole(selectedRole);
     setUser(fbUser);
-
     return fbUser;
   };
 
   const logout = async () => {
     await signOut(auth);
+    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+    // Clear legacy keys
     localStorage.removeItem("session_user");
     localStorage.removeItem("session_supervisor");
     localStorage.removeItem("session_admin");
@@ -166,4 +178,5 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export default AuthContext;
+export default AuthContext;
+

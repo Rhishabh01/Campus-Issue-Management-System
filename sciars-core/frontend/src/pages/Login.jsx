@@ -359,14 +359,15 @@ export default function Login() {
 
             {!isRegistering && (
               <div className="flex items-center justify-between">
-                <label className="flex items-center">
+                <label htmlFor="rememberMe" className="flex items-center cursor-pointer">
                   <input
+                    id="rememberMe"
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer"
                   />
-                  <span className="ml-2 text-sm text-slate-400">Remember me</span>
+                  <span className="ml-2 text-sm text-slate-400 select-none">Remember me</span>
                 </label>
                 <a
                   href="#"
