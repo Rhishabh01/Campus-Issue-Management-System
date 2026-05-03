@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 const DashboardSupervisor = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(10);
   const location = useLocation();
   const { user: authUser } = useAuth();
   const userEmail = authUser?.email || "";
@@ -30,7 +31,14 @@ const DashboardSupervisor = () => {
   useEffect(() => {
     if (!userEmail) return;
     fetchTasks();
-    const interval = setInterval(fetchTasks, 5000);
+    
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    let pollInterval = 5000; // default 5s
+    if (connection && ['slow-2g', '2g', '3g'].includes(connection.effectiveType)) {
+      pollInterval = 20000; // 20s on slow networks
+    }
+    
+    const interval = setInterval(fetchTasks, pollInterval);
     return () => clearInterval(interval);
   }, [userEmail]);
 
@@ -61,7 +69,15 @@ const DashboardSupervisor = () => {
           <div className={isResolvedView ? "lg:col-span-3" : "lg:col-span-2"}>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">{isResolvedView ? "Resolved Issues" : "My Tasks"}</h2>
-              <SupervisorTaskList tasks={displayedTasks} loading={loading} onStatusChange={fetchTasks} />
+              <SupervisorTaskList tasks={displayedTasks.slice(0, visibleCount)} loading={loading} onStatusChange={fetchTasks} />
+              {visibleCount < displayedTasks.length && (
+                <button
+                  onClick={() => setVisibleCount(v => v + 10)}
+                  className="w-full py-2.5 mt-4 bg-gray-50 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-100 font-medium transition-colors"
+                >
+                  Load More
+                </button>
+              )}
             </div>
           </div>
 

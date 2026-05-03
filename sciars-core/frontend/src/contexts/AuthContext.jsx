@@ -57,9 +57,10 @@ const getStoredSession = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const sessionExists = !!getStoredSession();
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!sessionExists);
 
   useEffect(() => {
     // Eagerly restore role from storage
@@ -92,14 +93,12 @@ export const AuthProvider = ({ children }) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
 
-    // 3. Sync role with backend
-    try {
-      const token = await fbUser.getIdToken();
-      await syncUserRole(selectedRole, token);
-    } catch (err) {
-      await signOut(auth);
-      throw new Error("auth/not-allowed");
-    }
+    // 3. Sync role with backend (Fire and forget)
+    fbUser.getIdToken().then(token => {
+      syncUserRole(selectedRole, token).catch(err => {
+        console.warn("Background role sync failed:", err);
+      });
+    }).catch(err => console.warn("Failed to get token for background sync:", err));
 
     // 4. Store session metadata
     const sessionData = {
@@ -133,13 +132,11 @@ export const AuthProvider = ({ children }) => {
       await updateProfile(fbUser, { displayName });
     }
 
-    try {
-      const token = await fbUser.getIdToken();
-      await syncUserRole(selectedRole, token);
-    } catch (err) {
-      await signOut(auth);
-      throw new Error("auth/not-allowed");
-    }
+    fbUser.getIdToken().then(token => {
+      syncUserRole(selectedRole, token).catch(err => {
+        console.warn("Background role sync failed:", err);
+      });
+    }).catch(err => console.warn("Failed to get token for background sync:", err));
 
     const sessionData = {
       email: fbUser.email,
@@ -164,14 +161,12 @@ export const AuthProvider = ({ children }) => {
     const result = await signInWithPopup(auth, provider);
     const fbUser = result.user;
 
-    // 3. Sync role with backend
-    try {
-      const token = await fbUser.getIdToken();
-      await syncUserRole(selectedRole, token);
-    } catch (err) {
-      await signOut(auth);
-      throw new Error("auth/not-allowed");
-    }
+    // 3. Sync role with backend (Fire and forget)
+    fbUser.getIdToken().then(token => {
+      syncUserRole(selectedRole, token).catch(err => {
+        console.warn("Background role sync failed:", err);
+      });
+    }).catch(err => console.warn("Failed to get token for background sync:", err));
 
     // 4. Store session metadata
     const sessionData = {
