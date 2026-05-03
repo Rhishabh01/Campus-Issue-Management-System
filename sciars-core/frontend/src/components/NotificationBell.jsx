@@ -138,29 +138,27 @@ const NotificationBell = ({ userId }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 max-h-[32rem] overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-              <div className="flex items-center gap-2">
-                {unreadCount > 0 && (
-                  <button
-                    onClick={markAllAsRead}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Mark all read
-                  </button>
-                )}
-                {loading && (
-                  <div className="flex items-center text-sm text-gray-500">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                  </div>
-                )}
-              </div>
+        <div className="absolute right-0 mt-2 w-96 max-h-[500px] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-white">Notifications</h3>
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-xs text-white/90 hover:text-white bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors"
+                >
+                  Mark all read
+                </button>
+              )}
+              {loading && (
+                <div className="flex items-center text-sm text-white/70">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="divide-y divide-gray-100">
+          <div className="max-h-[400px] overflow-y-auto">
             {error && (
               <div className="p-4 text-center text-sm text-red-500">
                 {error}
@@ -168,47 +166,70 @@ const NotificationBell = ({ userId }) => {
             )}
 
             {!error && notifications.length === 0 && !loading && (
-              <div className="p-8 text-center text-gray-500">
-                <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-gray-500">
+                <svg className="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                 </svg>
-                <p>No notifications</p>
+                <p className="text-sm font-medium">No notifications</p>
+                <p className="text-xs text-gray-400 mt-1">You're all caught up!</p>
               </div>
             )}
 
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                onClick={() => !notification.read && markAsRead(notification.id)}
-                className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  !notification.read ? 'bg-blue-50' : ''
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 mt-0.5">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${!notification.read ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
-                      {notification.title || notification.message}
-                    </p>
-                    {notification.message && notification.title && notification.title !== notification.message && (
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{notification.message}</p>
-                    )}
-                    <p className="text-xs text-gray-400 mt-1">
-                      {formatTime(notification.createdAt || notification.timestamp)}
-                    </p>
-                  </div>
-                  {!notification.read && (
-                    <div className="flex-shrink-0">
-                      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+            {!error && notifications.length > 0 && (
+              <div className="divide-y divide-gray-100">
+                {notifications.map((notification) => {
+                  const borderColor = notification.type === 'resolved'
+                    ? 'border-l-green-500'
+                    : notification.type === 'assigned'
+                      ? 'border-l-blue-500'
+                      : 'border-l-gray-400';
+
+                  return (
+                    <div
+                      key={notification.id}
+                      onClick={() => !notification.read && markAsRead(notification.id)}
+                      className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors border-l-4 ${borderColor} ${
+                        !notification.read ? 'bg-blue-50/50' : ''
+                      }`}
+                    >
+                      <div className="flex gap-3">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={`text-sm font-medium truncate ${
+                              !notification.read ? 'text-gray-900' : 'text-gray-600'
+                            }`}>
+                              {notification.title || notification.message}
+                            </p>
+                            {!notification.read && (
+                              <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
+                            )}
+                          </div>
+                          {notification.message && notification.title && notification.title !== notification.message && (
+                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">{notification.message}</p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-1.5">
+                            {formatTime(notification.createdAt || notification.timestamp)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  );
+                })}
               </div>
-            ))}
+            )}
           </div>
+
+          {notifications.length > 0 && (
+            <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+              <p className="text-xs text-gray-500 text-center">
+                {notifications.length} notification{notifications.length !== 1 ? 's' : ''} • Auto-refreshes every 10 seconds
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
