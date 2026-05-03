@@ -16,11 +16,11 @@ let tokenExpiry = null;
 const getAuthToken = async () => {
   const user = auth.currentUser;
   if (!user) return null;
-  
+
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken;
   }
-  
+
   try {
     const result = await user.getIdTokenResult();
     cachedToken = result.token;
@@ -75,7 +75,7 @@ API.interceptors.response.use(
     if (!config || !config.retry) {
       config.retry = 0;
     }
-    
+
     // Retry up to 3 times for network errors or 5xx
     if (config.retry < 3 && (err.message === 'Network Error' || (err.response && err.response.status >= 500))) {
       config.retry += 1;

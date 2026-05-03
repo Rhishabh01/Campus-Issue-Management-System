@@ -15,7 +15,7 @@ const NavbarUser = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate('/login');
   };
 
   return (

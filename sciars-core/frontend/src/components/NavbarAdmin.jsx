@@ -16,7 +16,7 @@ const NavbarAdmin = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate('/login');
   };
 
   const navLinks = [

@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LandingNavbar from '../components/LandingNavbar';
 
 function useRevealOnScroll() {
   useEffect(() => {
@@ -22,42 +21,8 @@ function useRevealOnScroll() {
   }, []);
 }
 
-function useAnimatedCounters() {
-  useEffect(() => {
-    const counters = document.querySelectorAll('[data-counter]');
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !entry.target.dataset.animated) {
-            entry.target.dataset.animated = 'true';
-            const end = parseInt(entry.target.dataset.counter, 10);
-            const duration = 2000;
-            let startTime = null;
-
-            const animate = (timestamp) => {
-              if (!startTime) startTime = timestamp;
-              const progress = Math.min((timestamp - startTime) / duration, 1);
-              const eased = 1 - Math.pow(1 - progress, 3);
-              entry.target.textContent = Math.floor(eased * end).toLocaleString() + (entry.target.dataset.suffix || '');
-              if (progress < 1) {
-                requestAnimationFrame(animate);
-              }
-            };
-            requestAnimationFrame(animate);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    counters.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-}
-
 export default function Landing() {
   useRevealOnScroll();
-  useAnimatedCounters();
 
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -106,44 +71,33 @@ export default function Landing() {
     },
   ];
 
-  const categories = [
-    { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', name: 'Infrastructure' },
-    { icon: 'M13 10V3L4 14h7v7l9-11h-7z', name: 'Electrical' },
-    { icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3', name: 'Cleanliness' },
-    { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', name: 'Safety' },
-    { icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', name: 'Transport' },
-    { icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064', name: 'Environment' },
-    { icon: 'M3 15a4 4 0 004 4h10a4 4 0 004-4V7a4 4 0 00-4-4H7a4 4 0 00-4 4v8zM8 11V7a1 1 0 112 0v4a1 1 0 11-2 0zM14 11V7a1 1 0 112 0v4a1 1 0 11-2 0z', name: 'Water' },
-    { icon: 'M12 14c-1.39 0-2.61-.71-3.35-1.8l-1.04-1.54C7.14 10.1 7 9.56 7 9c0-1.66 1.34-3 3-3h4c1.66 0 3 1.34 3 3 0 .56-.14 1.1-.41 1.56L15.55 12.1c-.74 1.09-1.96 1.8-3.35 1.8z', name: 'Accessibility' },
-  ];
-
   const roles = [
     {
       icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
       title: 'Student / Staff',
-      color: 'from-blue-500 to-indigo-600',
-      bgColor: 'bg-blue-500/10',
-      textColor: 'text-blue-400',
-      borderColor: 'border-blue-500/20',
+      color: 'from-primary-400 to-primary-500',
+      bgColor: 'bg-primary-400/10',
+      textColor: 'text-primary-400',
+      borderColor: 'border-primary-400/20',
       capabilities: ['Report issues with photos', 'Track issue status in real-time', 'View issues on interactive map', 'Receive notifications on updates'],
     },
     {
       icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
       title: 'Supervisor',
-      color: 'from-purple-500 to-pink-600',
-      bgColor: 'bg-purple-500/10',
-      textColor: 'text-purple-400',
-      borderColor: 'border-purple-500/20',
-      capabilities: ['View assigned tasks', 'Start work on issues', 'Mark issues as resolved', 'Upload proof of resolution (Complusory)'],
+      color: 'from-primary-500 to-primary-600',
+      bgColor: 'bg-primary-500/10',
+      textColor: 'text-primary-300',
+      borderColor: 'border-primary-500/20',
+      capabilities: ['View assigned tasks', 'Start work on issues', 'Mark issues as resolved', 'Upload proof of resolution'],
     },
     {
       icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
       title: 'Administrator',
-      color: 'from-emerald-500 to-teal-600',
-      bgColor: 'bg-emerald-500/10',
-      textColor: 'text-emerald-400',
-      borderColor: 'border-emerald-500/20',
-      capabilities: ['View all campus issues', 'Verify and prioritize reports', 'Access analytics dashboard', 'Manage users,supervisors and areas'],
+      color: 'from-primary-600 to-primary-700',
+      bgColor: 'bg-primary-600/10',
+      textColor: 'text-primary-200',
+      borderColor: 'border-primary-600/20',
+      capabilities: ['View all campus issues', 'Verify and prioritize reports', 'Access analytics dashboard', 'Manage users, supervisors and areas'],
     },
   ];
 
@@ -152,14 +106,13 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-[#07162B] text-white overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center px-4 pt-16">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-float-slow" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-3xl animate-pulse-glow" />
-          <div className="absolute inset-0 opacity-[0.03]" style={{
+          <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-[#00A6E2]/5 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#2760A3]/5 rounded-full blur-3xl animate-float-slow" />
+          <div className="absolute inset-0 opacity-[0.02]" style={{
             backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
             backgroundSize: '60px 60px'
           }} />
@@ -167,15 +120,15 @@ export default function Landing() {
 
         <div className="relative z-10 max-w-5xl mx-auto text-center">
           <div className="animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 backdrop-blur-xl rounded-full border border-slate-700/50 mb-8">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-sm text-slate-300">Smart Campus Issue & Resolution System</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#103463]/50 backdrop-blur-xl rounded-full border border-[#2760A3]/20 mb-8">
+              <span className="w-2 h-2 bg-[#00A6E2] rounded-full" />
+              <span className="text-sm text-[#AEE0F1]">Smart Campus Issue & Resolution System</span>
             </div>
           </div>
 
           <h1 className="animate-fade-in-up text-5xl sm:text-6xl md:text-7xl font-black mb-6 leading-tight">
             Report. Track.{' '}
-            <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+            <span className="bg-gradient-to-r from-[#00A6E2] to-[#2760A3] bg-clip-text text-transparent animate-gradient">
               Resolve.
             </span>
           </h1>
@@ -187,7 +140,7 @@ export default function Landing() {
           <div className="animate-fade-in-up flex flex-col sm:flex-row items-center justify-center gap-4" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
             <Link
               to="/login"
-              className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 flex items-center gap-2"
+              className="group px-8 py-4 bg-gradient-to-r from-[#00A6E2] to-[#2760A3] hover:from-[#00A6E2]/90 hover:to-[#2760A3]/90 text-white font-semibold rounded-xl transition-all duration-200 flex items-center gap-2"
             >
               Sign In
               <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +149,7 @@ export default function Landing() {
             </Link>
             <button
               onClick={() => scrollTo('features')}
-              className="px-8 py-4 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 rounded-xl text-slate-300 hover:text-white font-medium transition-all duration-200"
+              className="px-8 py-4 bg-[#103463]/50 hover:bg-[#103463]/70 border border-[#2760A3]/30 rounded-xl text-[#AEE0F1] hover:text-white font-medium transition-all duration-200"
             >
               Learn More
             </button>
@@ -204,8 +157,8 @@ export default function Landing() {
 
           <div className="animate-fade-in mt-16 flex flex-col items-center gap-2" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
             <span className="text-xs text-slate-500 uppercase tracking-widest">Scroll to explore</span>
-            <div className="w-6 h-10 border-2 border-slate-600 rounded-full flex justify-center">
-              <div className="w-1.5 h-3 bg-slate-400 rounded-full mt-2 animate-bounce" />
+            <div className="w-6 h-10 border-2 border-[#2760A3]/40 rounded-full flex justify-center">
+              <div className="w-1.5 h-3 bg-[#2760A3] rounded-full mt-2 animate-bounce" />
             </div>
           </div>
         </div>
@@ -215,7 +168,7 @@ export default function Landing() {
       <section id="features" className="relative py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="reveal text-center mb-16">
-            <span className="text-sm font-semibold text-blue-400 uppercase tracking-widest">Features</span>
+            <span className="text-sm font-semibold text-[#00A6E2] uppercase tracking-widest">Features</span>
             <h2 className="text-4xl sm:text-5xl font-bold mt-3 mb-4">Everything You Need</h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">
               Built from the ground up to make campus issue management seamless and transparent.
@@ -226,10 +179,10 @@ export default function Landing() {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className={`reveal stagger-${index + 1} group p-6 bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-slate-700/50 hover:border-blue-500/30 hover:bg-slate-800/50 transition-all duration-300 hover:-translate-y-1`}
+                className={`reveal stagger-${index + 1} group p-6 bg-[#103463]/30 backdrop-blur-xl rounded-2xl border border-[#2760A3]/20 hover:border-[#00A6E2]/40 hover:bg-[#103463]/50 transition-all duration-300 hover:-translate-y-1`}
               >
-                <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
-                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 bg-[#00A6E2]/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#00A6E2]/20 transition-colors">
+                  <svg className="w-6 h-6 text-[#00A6E2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={feature.icon} />
                   </svg>
                 </div>
@@ -243,10 +196,10 @@ export default function Landing() {
 
       {/* How It Works Section */}
       <section id="how-it-works" className="relative py-24 px-4">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-800/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#103463]/30 to-transparent" />
         <div className="relative max-w-7xl mx-auto">
           <div className="reveal text-center mb-16">
-            <span className="text-sm font-semibold text-indigo-400 uppercase tracking-widest">Process</span>
+            <span className="text-sm font-semibold text-[#2760A3] uppercase tracking-widest">Process</span>
             <h2 className="text-4xl sm:text-5xl font-bold mt-3 mb-4">How It Works</h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">
               Three simple steps from reporting to resolution.
@@ -260,21 +213,21 @@ export default function Landing() {
                 icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
                 title: 'Report',
                 description: 'Submit an issue with a description, photo, and location. Our system automatically captures GPS coordinates.',
-                color: 'from-blue-500 to-indigo-600',
+                color: 'from-primary-400 to-primary-500',
               },
               {
                 step: '02',
                 icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
                 title: 'Assign',
                 description: 'Administrators review and assign the issue to the appropriate supervisor or department for action.',
-                color: 'from-purple-500 to-pink-600',
+                color: 'from-primary-500 to-primary-600',
               },
               {
                 step: '03',
                 icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                 title: 'Resolve',
                 description: 'Supervisors address the issue and mark it resolved with proof. You get notified when it is done.',
-                color: 'from-emerald-500 to-teal-600',
+                color: 'from-primary-600 to-primary-700',
               },
             ].map((item, index) => (
               <div
@@ -282,16 +235,16 @@ export default function Landing() {
                 className={`reveal stagger-${index + 2} relative group`}
               >
                 {index < 2 && (
-                  <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-slate-700/50 to-transparent z-0" />
+                  <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-[#2760A3]/30 to-transparent z-0" />
                 )}
 
-                <div className="relative bg-slate-800/30 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-8 hover:border-slate-600/50 transition-all duration-300">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center mb-6 shadow-lg`}>
+                <div className="relative bg-[#103463]/30 backdrop-blur-xl rounded-2xl border border-[#2760A3]/20 p-8 hover:border-[#2760A3]/40 transition-all duration-300">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center mb-6`}>
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                     </svg>
                   </div>
-                  <div className="text-xs font-bold text-slate-600 mb-2">STEP {item.step}</div>
+                  <div className="text-xs font-bold text-[#2760A3] mb-2">STEP {item.step}</div>
                   <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
                   <p className="text-slate-400 leading-relaxed">{item.description}</p>
                 </div>
@@ -301,41 +254,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section id="categories" className="relative py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="reveal text-center mb-16">
-            <span className="text-sm font-semibold text-emerald-400 uppercase tracking-widest">Categories</span>
-            <h2 className="text-4xl sm:text-5xl font-bold mt-3 mb-4">Report Any Issue Type</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-              From infrastructure to environment, we cover all campus concern areas.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {categories.map((cat, index) => (
-              <div
-                key={index}
-                className={`reveal stagger-${index + 1} group flex flex-col items-center justify-center p-6 bg-slate-800/30 backdrop-blur-xl rounded-xl border border-slate-700/50 hover:border-blue-500/30 hover:bg-slate-800/50 transition-all duration-300 cursor-default`}
-              >
-                <div className="w-12 h-12 bg-primary-500/10 rounded-lg flex items-center justify-center mb-3 group-hover:bg-primary-500/20 transition-colors">
-                  <svg className="w-6 h-6 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={cat.icon} />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">{cat.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Roles Section */}
       <section id="roles" className="relative py-24 px-4">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-800/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#103463]/30 to-transparent" />
         <div className="relative max-w-7xl mx-auto">
           <div className="reveal text-center mb-16">
-            <span className="text-sm font-semibold text-purple-400 uppercase tracking-widest">Roles</span>
+            <span className="text-sm font-semibold text-[#AEE0F1] uppercase tracking-widest">Roles</span>
             <h2 className="text-4xl sm:text-5xl font-bold mt-3 mb-4">Built for Everyone</h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">
               Purpose-built interfaces for each role in the campus ecosystem.
@@ -346,7 +270,7 @@ export default function Landing() {
             {roles.map((role, index) => (
               <div
                 key={index}
-                className={`reveal stagger-${index + 2} bg-slate-800/30 backdrop-blur-xl rounded-2xl border ${role.borderColor} p-8 hover:-translate-y-1 transition-all duration-300`}
+                className={`reveal stagger-${index + 2} bg-[#103463]/30 backdrop-blur-xl rounded-2xl border ${role.borderColor} p-8 hover:-translate-y-1 transition-all duration-300`}
               >
                 <div className={`w-14 h-14 ${role.bgColor} rounded-xl flex items-center justify-center mb-6`}>
                   <svg className={`w-7 h-7 ${role.textColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -370,67 +294,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section id="stats" className="relative py-24 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="reveal bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-slate-700/50 p-8 sm:p-12">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {[
-                { value: 1250, suffix: '+', label: 'Issues Reported' },
-                { value: 980, suffix: '+', label: 'Issues Resolved' },
-                { value: 48, suffix: 'h', label: 'Avg Resolution Time' },
-                { value: 350, suffix: '+', label: 'Active Users' },
-              ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-2">
-                    <span
-                      data-counter={stat.value}
-                      data-suffix={stat.suffix}
-                      className="counter-value"
-                    >0{stat.suffix}</span>
-                  </div>
-                  <div className="text-sm text-slate-400">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section id="cta" className="relative py-24 px-4">
-        <div className="reveal max-w-4xl mx-auto text-center">
-          <div className="bg-gradient-to-r from-blue-600/20 via-indigo-600/20 to-purple-600/20 backdrop-blur-xl rounded-3xl border border-slate-700/50 p-10 sm:p-16">
-            <h2 className="text-3xl sm:text-5xl font-bold mb-4">
-              Ready to Make a{' '}
-              <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                Difference
-              </span>
-              ?
-            </h2>
-            <p className="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-              Join hundreds of students and staff who are already improving our campus, one report at a time.
-            </p>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 text-lg"
-            >
-              Sign In Now
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="relative border-t border-slate-800 py-12 px-4">
+      <footer className="relative border-t border-[#103463] py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#00A6E2] to-[#2760A3] rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
@@ -447,7 +317,6 @@ export default function Landing() {
               <div className="space-y-2">
                 <button onClick={() => scrollTo('features')} className="block text-sm text-slate-400 hover:text-white transition-colors">Features</button>
                 <button onClick={() => scrollTo('how-it-works')} className="block text-sm text-slate-400 hover:text-white transition-colors">How It Works</button>
-                <button onClick={() => scrollTo('categories')} className="block text-sm text-slate-400 hover:text-white transition-colors">Categories</button>
                 <button onClick={() => scrollTo('roles')} className="block text-sm text-slate-400 hover:text-white transition-colors">Roles</button>
               </div>
             </div>
@@ -462,7 +331,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="border-t border-[#103463] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-500">
               &copy; {new Date().getFullYear()} SCIARS. All rights reserved.
             </p>
@@ -477,10 +346,10 @@ export default function Landing() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 w-10 h-10 bg-slate-700/80 backdrop-blur-xl border border-slate-600/50 rounded-lg shadow-lg hover:bg-slate-600/80 hover:border-slate-500/50 transition-all duration-200 flex items-center justify-center group"
+          className="fixed bottom-8 right-8 z-50 w-10 h-10 bg-[#103463]/80 backdrop-blur-xl border border-[#2760A3]/40 rounded-lg hover:bg-[#103463] hover:border-[#2760A3]/60 transition-all duration-200 flex items-center justify-center group"
           aria-label="Scroll to top"
         >
-          <svg className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[#AEE0F1] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
           </svg>
         </button>
