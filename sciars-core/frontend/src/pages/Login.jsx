@@ -14,6 +14,7 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [selectedRole, setSelectedRole] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { login, register, firebaseErrorMessage } = useAuth();
 
@@ -49,7 +50,7 @@ export default function Login() {
         await register(email, password, name, selectedRole);
         toast.success("Account created successfully!");
       } else {
-        await login(email, password, selectedRole);
+        await login(email, password, selectedRole, rememberMe);
         toast.success("Welcome back!");
       }
       if (selectedRole === "user") navigate("/user");
@@ -361,6 +362,8 @@ export default function Login() {
                 <label className="flex items-center">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
                   />
                   <span className="ml-2 text-sm text-slate-400">Remember me</span>

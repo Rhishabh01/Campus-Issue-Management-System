@@ -5,6 +5,9 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  setPersistence,
 } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { syncUserRole } from "../services/api";
@@ -34,28 +37,41 @@ const firebaseErrorMessage = (code) => {
   return map[code] || "Authentication failed. Please try again.";
 };
 
+// Helper to restore role from localStorage session keys
+const restoreRoleFromStorage = () => {
+  for (const r of ["user", "supervisor", "admin"]) {
+    const session = localStorage.getItem(`session_${r}`);
+    if (session) {
+      try {
+        const data = JSON.parse(session);
+        if (data.email) return r;
+      } catch {}
+    }
+  }
+  return null;
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    for (const r of ["user", "supervisor", "admin"]) {
-      const session = localStorage.getItem(`session_${r}`);
-      if (session) {
-        try {
-          const data = JSON.parse(session);
-          if (data.email) {
-            setRole(r);
-            break;
-          }
-        } catch {}
-      }
-    }
+    // Eagerly restore role from localStorage so ProtectedRoute doesn't
+    // redirect before onAuthStateChanged has a chance to fire
+    const storedRole = restoreRoleFromStorage();
+    if (storedRole) setRole(storedRole);
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      if (!firebaseUser) {
+      if (firebaseUser) {
+        // Firebase user exists — restore role from localStorage
+        const restoredRole = restoreRoleFromStorage();
+        if (restoredRole) {
+          setRole(restoredRole);
+        }
+      } else {
+        // User signed out or session expired
         setRole(null);
       }
       setLoading(false);
@@ -64,7 +80,12 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  const login = async (email, password, selectedRole) => {
+  const login = async (email, password, selectedRole, rememberMe = false) => {
+    // Set persistence BEFORE signing in:
+    // - LOCAL: persists across browser restarts (Remember Me checked)
+    // - SESSION: cleared when tab/browser closes (Remember Me unchecked)
+    await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
 
@@ -91,6 +112,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (email, password, displayName, selectedRole) => {
+    // Registration always uses local persistence
+    await setPersistence(auth, browserLocalPersistence);
+
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const fbUser = userCredential.user;
 
@@ -142,4 +166,4 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export default AuthContext;
+export default AuthContext;
