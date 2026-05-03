@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ReportIssue from "./pages/ReportIssue";
@@ -11,6 +12,26 @@ import DashboardAdmin from "./pages/DashboardAdmin";
 import AdminIssues from "./pages/AdminIssues";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+function AuthenticatedRedirect() {
+  const { user, role, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (user && role) {
+    if (role === "user") return <Navigate to="/user" replace />;
+    if (role === "supervisor") return <Navigate to="/supervisor" replace />;
+    if (role === "admin") return <Navigate to="/admin" replace />;
+  }
+
+  return <Landing />;
+}
+
 function App() {
   return (
     <>
@@ -18,7 +39,8 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<AuthenticatedRedirect />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
               path="/report"

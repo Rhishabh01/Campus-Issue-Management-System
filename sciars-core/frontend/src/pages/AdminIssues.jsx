@@ -26,6 +26,7 @@ export default function AdminIssues() {
   const [sort, setSort]               = useState('newest');
   const [search, setSearch]           = useState('');
   const [expandedId, setExpandedId]   = useState(null);
+  const [visibleCount, setVisibleCount] = useState(20);
 
   useEffect(() => {
     const load = async () => {
@@ -197,7 +198,7 @@ export default function AdminIssues() {
 
             {/* Rows */}
             <div className="divide-y divide-gray-100">
-              {sorted.map((issue, index) => {
+              {sorted.slice(0, visibleCount).map((issue, index) => {
                 const sc = STATUS_CONFIG[issue.status] || STATUS_CONFIG.Closed;
                 const isExpanded = expandedId === issue.id;
 
@@ -334,8 +335,13 @@ export default function AdminIssues() {
             </div>
 
             {/* Footer count */}
-            <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-400">
-              Showing {sorted.length} of {issues.length} issues
+            <div className="px-5 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-400 flex justify-between items-center">
+              <span>Showing {Math.min(visibleCount, sorted.length)} of {sorted.length} (Total: {issues.length})</span>
+              {visibleCount < sorted.length && (
+                <button onClick={() => setVisibleCount(v => v + 20)} className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded font-medium hover:bg-indigo-100 transition-colors">
+                  Load More
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -18,6 +18,7 @@ export default function DashboardUser() {
   const [issues, setIssues] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(10);
   const userEmail = authUser?.email || "";
 
   const categories = [
@@ -62,7 +63,14 @@ export default function DashboardUser() {
       }
     };
     fetchNotifs();
-    const interval = setInterval(fetchNotifs, 10000);
+    
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    let pollInterval = 10000; // default 10s
+    if (connection && ['slow-2g', '2g', '3g'].includes(connection.effectiveType)) {
+      pollInterval = 30000; // 30s on slow networks
+    }
+    
+    const interval = setInterval(fetchNotifs, pollInterval);
     return () => clearInterval(interval);
   }, [userEmail]);
 
@@ -222,9 +230,17 @@ export default function DashboardUser() {
                 </div>
               ) : filteredIssues.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                  {filteredIssues.map((issue) => (
+                  {filteredIssues.slice(0, visibleCount).map((issue) => (
                     <IssueCard key={issue.id} issue={issue} onClick={() => setSelectedIssue(issue)} />
                   ))}
+                  {visibleCount < filteredIssues.length && (
+                    <button
+                      onClick={() => setVisibleCount(v => v + 10)}
+                      className="w-full py-2.5 mt-2 bg-gray-50 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-100 font-medium transition-colors"
+                    >
+                      Load More
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-12">
