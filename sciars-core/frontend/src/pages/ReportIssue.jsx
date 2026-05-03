@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import NavbarUser from "../components/NavbarUser";
 import CameraCapture from "../components/CameraCapture";
 import { createIssue } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const mapCategory = (cat) => {
   const map = {
@@ -39,6 +40,7 @@ const priorities = [
 
 export default function ReportIssue() {
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -142,11 +144,10 @@ export default function ReportIssue() {
 
     setIsSubmitting(true);
     try {
-      const userStr = localStorage.getItem("session_user");
-      const user = userStr ? JSON.parse(userStr) : { email: "user1@gmail.com" };
+      const userEmail = authUser?.email || "";
 
       const payload = {
-        userId: user.email,
+        userId: userEmail,
         category: mapCategory(formData.category),
         description: formData.description,
         lat: formData.lat ?? 17.3850,

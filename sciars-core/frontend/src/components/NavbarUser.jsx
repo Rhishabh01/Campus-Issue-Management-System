@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,18 +7,9 @@ const NavbarUser = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user: authUser } = useAuth();
 
-  const userEmail = useMemo(() => {
-    try {
-      const session = localStorage.getItem('session_user');
-      if (session) {
-        const data = JSON.parse(session);
-        return data.email || 'user@campus.edu';
-      }
-    } catch {}
-    return 'user@campus.edu';
-  }, []);
+  const userEmail = authUser?.email || 'user@campus.edu';
 
   const isActive = (path) => location.pathname === path;
 

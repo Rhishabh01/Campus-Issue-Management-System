@@ -4,18 +4,19 @@ import NavbarSupervisor from "../components/NavbarSupervisor";
 import SupervisorTaskList from "../components/SupervisorTaskList";
 import DashboardCharts from "../components/DashboardCharts";
 import { getIssues } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
 
 const DashboardSupervisor = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  
-  const userStr = localStorage.getItem("session_supervisor");
-  const user = userStr ? JSON.parse(userStr) : {};
+  const { user: authUser } = useAuth();
+  const userEmail = authUser?.email || "";
 
   const fetchTasks = async () => {
+    if (!userEmail) return;
     try {
-      const res = await getIssues({ role: "supervisor", email: user.email });
+      const res = await getIssues({ role: "supervisor", email: userEmail });
       const tasksArray = Array.isArray(res.data) ? res.data : [];
       const sortedTasks = tasksArray.sort((a, b) => (b.reportCount || 1) - (a.reportCount || 1));
       setTasks(sortedTasks);
@@ -27,10 +28,11 @@ const DashboardSupervisor = () => {
   };
 
   useEffect(() => {
+    if (!userEmail) return;
     fetchTasks();
-    const interval = setInterval(fetchTasks, 5000); // Poll every 5 seconds
+    const interval = setInterval(fetchTasks, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userEmail]);
 
   const stats = {
     open: tasks.filter((t) => t.status === "Open").length,
